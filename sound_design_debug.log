@@ -1,0 +1,191 @@
+2025-11-04 12:20:42,498 - INFO - === Starting mixed playback with 2 layers ===
+2025-11-04 12:20:42,502 - INFO - Generated 2 audio arrays, max_duration = 66150 samples
+2025-11-04 12:20:42,502 - DEBUG - Layer 0: original length = 66150, max_duration = 66150
+2025-11-04 12:20:42,502 - DEBUG - Layer 1: original length = 52920, max_duration = 66150
+2025-11-04 12:20:42,502 - DEBUG - Layer 1: after padding length = 66150
+2025-11-04 12:20:42,502 - INFO - All padded lengths: [66150, 66150]
+2025-11-04 12:20:42,502 - INFO - Array shapes before vstack: [(66150,), (66150,)]
+2025-11-04 12:20:42,503 - INFO - Mixed audio shape: (66150,)
+2025-11-04 12:20:42,503 - INFO - Playing mixed audio, shape: (66150,)
+2025-11-04 12:20:44,094 - INFO - Playback complete
+2025-11-04 12:20:49,553 - INFO - === Starting mixed playback with 2 layers ===
+2025-11-04 12:20:49,557 - INFO - Generated 2 audio arrays, max_duration = 66150 samples
+2025-11-04 12:20:49,557 - DEBUG - Layer 0: original length = 66150, max_duration = 66150
+2025-11-04 12:20:49,557 - DEBUG - Layer 1: original length = 52920, max_duration = 66150
+2025-11-04 12:20:49,557 - DEBUG - Layer 1: after padding length = 66150
+2025-11-04 12:20:49,557 - INFO - All padded lengths: [66150, 66150]
+2025-11-04 12:20:49,557 - INFO - Array shapes before vstack: [(66150,), (66150,)]
+2025-11-04 12:20:49,558 - INFO - Mixed audio shape: (66150,)
+2025-11-04 12:20:49,558 - INFO - Playing mixed audio, shape: (66150,)
+2025-11-04 12:20:51,136 - INFO - Playback complete
+2025-11-04 12:20:51,144 - INFO - === Starting mixed playback with 2 layers ===
+2025-11-04 12:20:51,149 - INFO - Generated 2 audio arrays, max_duration = 88200 samples
+2025-11-04 12:20:51,150 - DEBUG - Layer 0: original length = 88200, max_duration = 88200
+2025-11-04 12:20:51,150 - DEBUG - Layer 1: original length = 88200, max_duration = 88200
+2025-11-04 12:20:51,150 - INFO - All padded lengths: [88200, 88200]
+2025-11-04 12:20:51,150 - INFO - Array shapes before vstack: [(88200,), (88200,)]
+2025-11-04 12:20:51,150 - INFO - Mixed audio shape: (88200,)
+2025-11-04 12:20:51,150 - INFO - Playing mixed audio, shape: (88200,)
+2025-11-04 12:20:53,215 - INFO - Playback complete
+2025-11-04 12:20:53,221 - INFO - === Starting mixed playback with 2 layers ===
+2025-11-04 12:20:53,224 - INFO - Generated 2 audio arrays, max_duration = 66150 samples
+2025-11-04 12:20:53,224 - DEBUG - Layer 0: original length = 66150, max_duration = 66150
+2025-11-04 12:20:53,224 - DEBUG - Layer 1: original length = 52920, max_duration = 66150
+2025-11-04 12:20:53,224 - DEBUG - Layer 1: after padding length = 66150
+2025-11-04 12:20:53,225 - INFO - All padded lengths: [66150, 66150]
+2025-11-04 12:20:53,225 - INFO - Array shapes before vstack: [(66150,), (66150,)]
+2025-11-04 12:20:53,225 - INFO - Mixed audio shape: (66150,)
+2025-11-04 12:20:53,225 - INFO - Playing mixed audio, shape: (66150,)
+2025-11-04 12:20:54,806 - INFO - Playback complete
+2025-11-04 12:20:54,815 - INFO - === Starting mixed playback with 2 layers ===
+2025-11-04 12:20:54,820 - INFO - Generated 2 audio arrays, max_duration = 88200 samples
+2025-11-04 12:20:54,820 - DEBUG - Layer 0: original length = 88200, max_duration = 88200
+2025-11-04 12:20:54,820 - DEBUG - Layer 1: original length = 88200, max_duration = 88200
+2025-11-04 12:20:54,820 - INFO - All padded lengths: [88200, 88200]
+2025-11-04 12:20:54,820 - INFO - Array shapes before vstack: [(88200,), (88200,)]
+2025-11-04 12:20:54,820 - INFO - Mixed audio shape: (88200,)
+2025-11-04 12:20:54,820 - INFO - Playing mixed audio, shape: (88200,)
+2025-11-04 12:20:56,900 - INFO - Playback complete
+2025-11-04 12:20:56,906 - INFO - === Starting mixed playback with 3 layers ===
+2025-11-04 12:20:56,909 - INFO - Generated 3 audio arrays, max_duration = 44100 samples
+2025-11-04 12:20:56,910 - DEBUG - Layer 0: original length = 44100, max_duration = 44100
+2025-11-04 12:20:56,910 - DEBUG - Layer 1: original length = 44100, max_duration = 44100
+2025-11-04 12:20:56,910 - DEBUG - Layer 2: original length = 44100, max_duration = 44100
+2025-11-04 12:20:56,910 - INFO - All padded lengths: [44100, 44100, 44100]
+2025-11-04 12:20:56,910 - INFO - Array shapes before vstack: [(44100,), (44100,), (44100,)]
+2025-11-04 12:20:56,910 - INFO - Mixed audio shape: (44100,)
+2025-11-04 12:20:56,910 - INFO - Playing mixed audio, shape: (44100,)
+2025-11-04 12:20:57,975 - INFO - Playback complete
+2025-11-04 12:20:59,587 - INFO - === Starting mixed playback with 2 layers ===
+2025-11-04 12:20:59,590 - INFO - Generated 2 audio arrays, max_duration = 66150 samples
+2025-11-04 12:20:59,590 - DEBUG - Layer 0: original length = 66150, max_duration = 66150
+2025-11-04 12:20:59,590 - DEBUG - Layer 1: original length = 66150, max_duration = 66150
+2025-11-04 12:20:59,590 - INFO - All padded lengths: [66150, 66150]
+2025-11-04 12:20:59,590 - INFO - Array shapes before vstack: [(66150,), (66150,)]
+2025-11-04 12:20:59,590 - INFO - Mixed audio shape: (66150,)
+2025-11-04 12:20:59,590 - INFO - Playing mixed audio, shape: (66150,)
+2025-11-04 12:21:01,169 - INFO - Playback complete
+2025-11-04 12:21:01,436 - INFO - === Starting mixed playback with 2 layers ===
+2025-11-04 12:21:01,443 - INFO - Generated 2 audio arrays, max_duration = 88200 samples
+2025-11-04 12:21:01,443 - DEBUG - Layer 0: original length = 88200, max_duration = 88200
+2025-11-04 12:21:01,443 - DEBUG - Layer 1: original length = 88200, max_duration = 88200
+2025-11-04 12:21:01,443 - INFO - All padded lengths: [88200, 88200]
+2025-11-04 12:21:01,443 - INFO - Array shapes before vstack: [(88200,), (88200,)]
+2025-11-04 12:21:01,443 - INFO - Mixed audio shape: (88200,)
+2025-11-04 12:21:01,443 - INFO - Playing mixed audio, shape: (88200,)
+2025-11-04 12:21:03,525 - INFO - Playback complete
+2025-11-04 12:21:06,726 - INFO - === Starting mixed playback with 2 layers ===
+2025-11-04 12:21:06,727 - INFO - Generated 2 audio arrays, max_duration = 8820 samples
+2025-11-04 12:21:06,727 - DEBUG - Layer 0: original length = 8820, max_duration = 8820
+2025-11-04 12:21:06,727 - DEBUG - Layer 1: original length = 6615, max_duration = 8820
+2025-11-04 12:21:06,727 - DEBUG - Layer 1: after padding length = 8820
+2025-11-04 12:21:06,727 - INFO - All padded lengths: [8820, 8820]
+2025-11-04 12:21:06,727 - INFO - Array shapes before vstack: [(8820,), (8820,)]
+2025-11-04 12:21:06,728 - INFO - Mixed audio shape: (8820,)
+2025-11-04 12:21:06,728 - INFO - Playing mixed audio, shape: (8820,)
+2025-11-04 12:21:07,004 - INFO - Playback complete
+2025-11-04 12:21:07,507 - INFO - === Starting mixed playback with 2 layers ===
+2025-11-04 12:21:07,508 - INFO - Generated 2 audio arrays, max_duration = 4410 samples
+2025-11-04 12:21:07,508 - DEBUG - Layer 0: original length = 4410, max_duration = 4410
+2025-11-04 12:21:07,508 - DEBUG - Layer 1: original length = 4410, max_duration = 4410
+2025-11-04 12:21:07,508 - INFO - All padded lengths: [4410, 4410]
+2025-11-04 12:21:07,508 - INFO - Array shapes before vstack: [(4410,), (4410,)]
+2025-11-04 12:21:07,508 - INFO - Mixed audio shape: (4410,)
+2025-11-04 12:21:07,508 - INFO - Playing mixed audio, shape: (4410,)
+2025-11-04 12:21:07,674 - INFO - Playback complete
+2025-11-04 12:21:18,623 - INFO - === Starting mixed playback with 2 layers ===
+2025-11-04 12:21:18,625 - INFO - Generated 2 audio arrays, max_duration = 35280 samples
+2025-11-04 12:21:18,625 - DEBUG - Layer 0: original length = 35280, max_duration = 35280
+2025-11-04 12:21:18,625 - DEBUG - Layer 1: original length = 35280, max_duration = 35280
+2025-11-04 12:21:18,625 - INFO - All padded lengths: [35280, 35280]
+2025-11-04 12:21:18,625 - INFO - Array shapes before vstack: [(35280,), (35280,)]
+2025-11-04 12:21:18,625 - INFO - Mixed audio shape: (35280,)
+2025-11-04 12:21:18,626 - INFO - Playing mixed audio, shape: (35280,)
+2025-11-04 12:21:19,512 - INFO - Playback complete
+2025-11-04 12:21:22,630 - INFO - === Starting mixed playback with 2 layers ===
+2025-11-04 12:21:22,637 - INFO - Generated 2 audio arrays, max_duration = 132300 samples
+2025-11-04 12:21:22,637 - DEBUG - Layer 0: original length = 132300, max_duration = 132300
+2025-11-04 12:21:22,637 - DEBUG - Layer 1: original length = 132300, max_duration = 132300
+2025-11-04 12:21:22,637 - INFO - All padded lengths: [132300, 132300]
+2025-11-04 12:21:22,637 - INFO - Array shapes before vstack: [(132300,), (132300,)]
+2025-11-04 12:21:22,638 - INFO - Mixed audio shape: (132300,)
+2025-11-04 12:21:22,638 - INFO - Playing mixed audio, shape: (132300,)
+2025-11-04 12:21:25,714 - INFO - Playback complete
+2025-11-04 12:21:25,961 - INFO - === Starting mixed playback with 3 layers ===
+2025-11-04 12:21:25,972 - INFO - Generated 3 audio arrays, max_duration = 176400 samples
+2025-11-04 12:21:25,972 - DEBUG - Layer 0: original length = 176400, max_duration = 176400
+2025-11-04 12:21:25,972 - DEBUG - Layer 1: original length = 176400, max_duration = 176400
+2025-11-04 12:21:25,972 - DEBUG - Layer 2: original length = 176400, max_duration = 176400
+2025-11-04 12:21:25,972 - INFO - All padded lengths: [176400, 176400, 176400]
+2025-11-04 12:21:25,972 - INFO - Array shapes before vstack: [(176400,), (176400,), (176400,)]
+2025-11-04 12:21:25,972 - INFO - Mixed audio shape: (176400,)
+2025-11-04 12:21:25,973 - INFO - Playing mixed audio, shape: (176400,)
+2025-11-04 12:21:30,063 - INFO - Playback complete
+2025-11-04 12:21:37,299 - INFO - === Starting mixed playback with 2 layers ===
+2025-11-04 12:21:37,301 - INFO - Generated 2 audio arrays, max_duration = 13230 samples
+2025-11-04 12:21:37,301 - DEBUG - Layer 0: original length = 13230, max_duration = 13230
+2025-11-04 12:21:37,301 - DEBUG - Layer 1: original length = 13230, max_duration = 13230
+2025-11-04 12:21:37,301 - INFO - All padded lengths: [13230, 13230]
+2025-11-04 12:21:37,301 - INFO - Array shapes before vstack: [(13230,), (13230,)]
+2025-11-04 12:21:37,301 - INFO - Mixed audio shape: (13230,)
+2025-11-04 12:21:37,301 - INFO - Playing mixed audio, shape: (13230,)
+2025-11-04 12:21:37,677 - INFO - Playback complete
+2025-11-04 12:21:42,002 - INFO - === Starting mixed playback with 2 layers ===
+2025-11-04 12:21:42,004 - INFO - Generated 2 audio arrays, max_duration = 11025 samples
+2025-11-04 12:21:42,004 - DEBUG - Layer 0: original length = 11025, max_duration = 11025
+2025-11-04 12:21:42,004 - DEBUG - Layer 1: original length = 8820, max_duration = 11025
+2025-11-04 12:21:42,004 - DEBUG - Layer 1: after padding length = 11025
+2025-11-04 12:21:42,004 - INFO - All padded lengths: [11025, 11025]
+2025-11-04 12:21:42,004 - INFO - Array shapes before vstack: [(11025,), (11025,)]
+2025-11-04 12:21:42,004 - INFO - Mixed audio shape: (11025,)
+2025-11-04 12:21:42,004 - INFO - Playing mixed audio, shape: (11025,)
+2025-11-04 12:21:42,333 - INFO - Playback complete
+2025-11-04 12:21:49,021 - INFO - === Starting mixed playback with 3 layers ===
+2025-11-04 12:21:49,024 - INFO - Generated 3 audio arrays, max_duration = 35280 samples
+2025-11-04 12:21:49,024 - DEBUG - Layer 0: original length = 35280, max_duration = 35280
+2025-11-04 12:21:49,024 - DEBUG - Layer 1: original length = 35280, max_duration = 35280
+2025-11-04 12:21:49,024 - DEBUG - Layer 2: original length = 35280, max_duration = 35280
+2025-11-04 12:21:49,024 - INFO - All padded lengths: [35280, 35280, 35280]
+2025-11-04 12:21:49,024 - INFO - Array shapes before vstack: [(35280,), (35280,), (35280,)]
+2025-11-04 12:21:49,024 - INFO - Mixed audio shape: (35280,)
+2025-11-04 12:21:49,024 - INFO - Playing mixed audio, shape: (35280,)
+2025-11-04 12:21:49,907 - INFO - Playback complete
+2025-11-04 12:21:54,671 - INFO - === Starting mixed playback with 3 layers ===
+2025-11-04 12:21:54,674 - INFO - Generated 3 audio arrays, max_duration = 35280 samples
+2025-11-04 12:21:54,674 - DEBUG - Layer 0: original length = 35280, max_duration = 35280
+2025-11-04 12:21:54,674 - DEBUG - Layer 1: original length = 35280, max_duration = 35280
+2025-11-04 12:21:54,674 - DEBUG - Layer 2: original length = 35280, max_duration = 35280
+2025-11-04 12:21:54,674 - INFO - All padded lengths: [35280, 35280, 35280]
+2025-11-04 12:21:54,674 - INFO - Array shapes before vstack: [(35280,), (35280,), (35280,)]
+2025-11-04 12:21:54,674 - INFO - Mixed audio shape: (35280,)
+2025-11-04 12:21:54,674 - INFO - Playing mixed audio, shape: (35280,)
+2025-11-04 12:21:55,567 - INFO - Playback complete
+2025-11-04 12:21:58,546 - INFO - === Starting mixed playback with 2 layers ===
+2025-11-04 12:21:58,550 - INFO - Generated 2 audio arrays, max_duration = 66150 samples
+2025-11-04 12:21:58,550 - DEBUG - Layer 0: original length = 66150, max_duration = 66150
+2025-11-04 12:21:58,550 - DEBUG - Layer 1: original length = 52920, max_duration = 66150
+2025-11-04 12:21:58,550 - DEBUG - Layer 1: after padding length = 66150
+2025-11-04 12:21:58,550 - INFO - All padded lengths: [66150, 66150]
+2025-11-04 12:21:58,550 - INFO - Array shapes before vstack: [(66150,), (66150,)]
+2025-11-04 12:21:58,550 - INFO - Mixed audio shape: (66150,)
+2025-11-04 12:21:58,550 - INFO - Playing mixed audio, shape: (66150,)
+2025-11-04 12:22:00,140 - INFO - Playback complete
+2025-11-04 12:22:00,148 - INFO - === Starting mixed playback with 2 layers ===
+2025-11-04 12:22:00,153 - INFO - Generated 2 audio arrays, max_duration = 88200 samples
+2025-11-04 12:22:00,153 - DEBUG - Layer 0: original length = 88200, max_duration = 88200
+2025-11-04 12:22:00,153 - DEBUG - Layer 1: original length = 88200, max_duration = 88200
+2025-11-04 12:22:00,153 - INFO - All padded lengths: [88200, 88200]
+2025-11-04 12:22:00,153 - INFO - Array shapes before vstack: [(88200,), (88200,)]
+2025-11-04 12:22:00,153 - INFO - Mixed audio shape: (88200,)
+2025-11-04 12:22:00,153 - INFO - Playing mixed audio, shape: (88200,)
+2025-11-04 12:22:02,230 - INFO - Playback complete
+2025-11-04 12:22:13,279 - INFO - === Starting mixed playback with 3 layers ===
+2025-11-04 12:22:13,283 - INFO - Generated 3 audio arrays, max_duration = 44100 samples
+2025-11-04 12:22:13,284 - DEBUG - Layer 0: original length = 44100, max_duration = 44100
+2025-11-04 12:22:13,284 - DEBUG - Layer 1: original length = 44100, max_duration = 44100
+2025-11-04 12:22:13,284 - DEBUG - Layer 2: original length = 44100, max_duration = 44100
+2025-11-04 12:22:13,284 - INFO - All padded lengths: [44100, 44100, 44100]
+2025-11-04 12:22:13,284 - INFO - Array shapes before vstack: [(44100,), (44100,), (44100,)]
+2025-11-04 12:22:13,284 - INFO - Mixed audio shape: (44100,)
+2025-11-04 12:22:13,284 - INFO - Playing mixed audio, shape: (44100,)
+2025-11-04 12:22:14,360 - INFO - Playback complete

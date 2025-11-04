@@ -1,7 +1,14 @@
 @echo off
-REM Sound Design Studio Launcher
-REM Launches the Sound Design Studio application
+REM Launcher for Sound Design Studio
 
-cd /d "%~dp0"
-python sound_design_studio.py
-pause
+echo Starting Sound Design Studio...
+
+REM Check if virtual environment exists
+if exist .venv\Scripts\activate.bat (
+    call .venv\Scripts\activate.bat
+    python sound_design_studio.py
+) else (
+    echo ERROR: Virtual environment not found!
+    echo Please run setup.bat first to install dependencies.
+    pause
+)

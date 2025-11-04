@@ -27,7 +27,7 @@ hiddenimports = [
 ]
 
 a = Analysis(
-    ['sound_design_studio_v2.py'],
+    ['sound_design_studio.py'],
     pathex=[],
     binaries=[],
     datas=datas,

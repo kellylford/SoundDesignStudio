@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "C:\Users\kelly\GitHub\SoundDesignStudio\SoundDesignStudio\sound_design_studio_v2.py", line 37, in <module>
+    from simple_audio_player import EnhancedAudioPlayer, PlayAudioConfig
+  File "C:\Users\kelly\GitHub\SoundDesignStudio\SoundDesignStudio\simple_audio_player.py", line 7, in <module>
+    import sounddevice as sd
+ModuleNotFoundError: No module named 'sounddevice'

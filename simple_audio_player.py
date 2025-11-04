@@ -32,6 +32,7 @@ class PlayAudioConfig:
     decay: float = 0.1
     sustain: float = 0.7
     release: float = 0.15
+    overlap: float = 0.0  # Overlap with previous layer in sequential mode (seconds)
     harmonics: dict = None
     blending: dict = None
     advanced: dict = None
