@@ -9,6 +9,16 @@ from scipy.io import wavfile
 from dataclasses import dataclass
 from typing import Optional
 from pathlib import Path
+import logging
+
+# Set up logging to file
+logging.basicConfig(
+    filename='sound_design_debug.log',
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    filemode='w'  # Overwrite log file each time
+)
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -94,6 +104,8 @@ class EnhancedAudioPlayer:
             if not configs:
                 return
             
+            logger.info(f"=== Starting mixed playback with {len(configs)} layers ===")
+            
             # Generate audio for all configs
             all_audio = []
             max_duration = 0
@@ -104,20 +116,37 @@ class EnhancedAudioPlayer:
                 all_audio.append(audio)
                 max_duration = max(max_duration, len(audio))
             
+            logger.info(f"Generated {len(all_audio)} audio arrays, max_duration = {max_duration} samples")
+            
             # Pad all audio to same length and store in new list
             padded_audio = []
-            for audio in all_audio:
+            for i, audio in enumerate(all_audio):
+                logger.debug(f"Layer {i}: original length = {len(audio)}, max_duration = {max_duration}")
                 if len(audio) < max_duration:
                     padding = np.zeros(max_duration - len(audio))
                     audio = np.concatenate([audio, padding])
+                    logger.debug(f"Layer {i}: after padding length = {len(audio)}")
                 padded_audio.append(audio)
+            
+            # Debug: Check all lengths
+            lengths = [len(a) for a in padded_audio]
+            logger.info(f"All padded lengths: {lengths}")
             
             # Mix by averaging (to prevent clipping)
             if len(padded_audio) == 1:
                 mixed = padded_audio[0]
+                logger.info("Single layer - no mixing needed")
             else:
                 # Stack arrays vertically then average
-                mixed = np.mean(np.vstack(padded_audio), axis=0)
+                try:
+                    shapes = [a.shape for a in padded_audio]
+                    logger.info(f"Array shapes before vstack: {shapes}")
+                    mixed = np.mean(np.vstack(padded_audio), axis=0)
+                    logger.info(f"Mixed audio shape: {mixed.shape}")
+                except Exception as e:
+                    logger.error(f"Error in vstack: {e}")
+                    logger.error(f"Padded audio shapes: {[a.shape for a in padded_audio]}")
+                    raise
             
             # Normalize to prevent distortion
             max_val = np.max(np.abs(mixed))
@@ -127,11 +156,14 @@ class EnhancedAudioPlayer:
             # Clip just in case
             mixed = np.clip(mixed, -1.0, 1.0)
             
+            logger.info(f"Playing mixed audio, shape: {mixed.shape}")
             # Play the mixed sound
             sd.play(mixed, self.sample_rate)
             sd.wait()
+            logger.info("Playback complete")
             
         except Exception as e:
+            logger.exception(f"Error playing mixed sounds: {e}")
             print(f"Error playing mixed sounds: {e}")
             raise
     
@@ -164,6 +196,8 @@ class EnhancedAudioPlayer:
             if not configs:
                 return False
             
+            logger.info(f"=== Starting mixed export with {len(configs)} layers to {file_path} ===")
+            
             # Generate audio for all configs
             all_audio = []
             max_duration = 0
@@ -174,16 +208,37 @@ class EnhancedAudioPlayer:
                 all_audio.append(audio)
                 max_duration = max(max_duration, len(audio))
             
+            logger.info(f"Generated {len(all_audio)} audio arrays, max_duration = {max_duration} samples")
+            
             # Pad all audio to same length and store in new list
             padded_audio = []
-            for audio in all_audio:
+            for i, audio in enumerate(all_audio):
+                logger.debug(f"Layer {i}: original length = {len(audio)}, max_duration = {max_duration}")
                 if len(audio) < max_duration:
                     padding = np.zeros(max_duration - len(audio))
                     audio = np.concatenate([audio, padding])
+                    logger.debug(f"Layer {i}: after padding length = {len(audio)}")
                 padded_audio.append(audio)
             
+            # Debug: Check all lengths
+            lengths = [len(a) for a in padded_audio]
+            logger.info(f"All padded lengths: {lengths}")
+            
             # Mix by averaging (to prevent clipping)
-            mixed = np.mean(np.array(padded_audio), axis=0)
+            if len(padded_audio) == 1:
+                mixed = padded_audio[0]
+                logger.info("Single layer - no mixing needed")
+            else:
+                # Stack arrays vertically then average
+                try:
+                    shapes = [a.shape for a in padded_audio]
+                    logger.info(f"Array shapes before vstack: {shapes}")
+                    mixed = np.mean(np.vstack(padded_audio), axis=0)
+                    logger.info(f"Mixed audio shape: {mixed.shape}")
+                except Exception as e:
+                    logger.error(f"Error in vstack: {e}")
+                    logger.error(f"Padded audio shapes: {[a.shape for a in padded_audio]}")
+                    raise
             
             # Normalize to prevent distortion
             max_val = np.max(np.abs(mixed))
@@ -198,9 +253,11 @@ class EnhancedAudioPlayer:
             
             # Write WAV file
             wavfile.write(file_path, self.sample_rate, mixed_int)
+            logger.info(f"Successfully exported to {file_path}")
             
             return True
         except Exception as e:
+            logger.exception(f"Error exporting mixed to WAV: {e}")
             print(f"Error exporting mixed to WAV: {e}")
             raise
     
@@ -330,9 +387,12 @@ class EnhancedAudioPlayer:
         # Ensure we don't exceed array bounds
         attack_samples = min(attack_samples, num_samples)
         decay_samples = min(decay_samples, num_samples - attack_samples)
-        release_samples = min(release_samples, num_samples)
         
-        sustain_samples = num_samples - attack_samples - decay_samples - release_samples
+        # Calculate remaining space for sustain and release
+        remaining = num_samples - attack_samples - decay_samples
+        release_samples = min(release_samples, remaining)
+        
+        sustain_samples = remaining - release_samples
         sustain_samples = max(0, sustain_samples)
         
         current_idx = 0
@@ -354,8 +414,11 @@ class EnhancedAudioPlayer:
         
         # Release phase
         if release_samples > 0:
-            start_level = config.sustain if current_idx > 0 else 1.0
-            envelope[current_idx:current_idx + release_samples] = np.linspace(start_level, 0, release_samples)
+            # Make sure we don't exceed the envelope bounds
+            actual_release = min(release_samples, num_samples - current_idx)
+            if actual_release > 0:
+                start_level = config.sustain if current_idx > 0 else 1.0
+                envelope[current_idx:current_idx + actual_release] = np.linspace(start_level, 0, actual_release)
         
         return audio * envelope
     
