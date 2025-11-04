@@ -1,0 +1,17 @@
+# Sound Design Studio Requirements
+# Python 3.8+ required
+
+# GUI Framework
+PyQt6>=6.4.0
+
+# Audio Processing
+numpy>=1.24.0
+sounddevice>=0.4.6
+soundfile>=0.12.1
+scipy>=1.10.0
+
+# Build and Distribution
+pyinstaller>=5.13.0
+
+# Optional: For advanced features
+# matplotlib>=3.7.0  # For waveform visualization
