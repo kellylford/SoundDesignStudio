@@ -11,14 +11,16 @@ from typing import Optional
 from pathlib import Path
 import logging
 
-# Set up logging to file
-logging.basicConfig(
-    filename='sound_design_debug.log',
-    level=logging.DEBUG,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    filemode='w'  # Overwrite log file each time
-)
+# Set up logging (disabled by default to avoid creating debug files)
+# Uncomment the following lines for debugging if needed:
+# logging.basicConfig(
+#     filename='sound_design_debug.log',
+#     level=logging.DEBUG,
+#     format='%(asctime)s - %(levelname)s - %(message)s',
+#     filemode='w'
+# )
 logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())  # Suppress all logging output
 
 
 @dataclass

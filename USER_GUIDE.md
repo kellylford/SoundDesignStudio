@@ -581,8 +581,7 @@ Calculate frequencies:
 If you encounter issues:
 1. Check this user guide
 2. Review error messages in the status bar
-3. Check sound_design_debug.log (located next to the .exe) for detailed errors
-4. Try restarting the application
+3. Try restarting the application
 
 ### Best Practices
 
