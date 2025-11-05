@@ -21,3 +21,7 @@ venv/
 # OS
 .DS_Store
 Thumbs.db
+
+# Exported preset demos (generated files)
+preset_demos/
+test_export/

@@ -223,5 +223,150 @@ def get_preset_library():
                     ]
                 }
             }
+        },
+        "Advanced Synthesis": {
+            "FM Sounds": {
+                "FM Bell": {
+                    "playback_mode": "simultaneous",
+                    "layers": [
+                        {"name": "Carrier", "config": {"frequency": 440, "wave_type": "sine", "duration": 2.0, "volume": 0.5, "attack": 0.001, "decay": 0.8, "sustain": 0.2, "release": 1.2, "advanced": {"enabled": True, "synthesis_type": "fm", "fm_mod_ratio": 2.5, "fm_mod_index": 8.0}}},
+                        {"name": "Brightness", "config": {"frequency": 880, "wave_type": "sine", "duration": 2.0, "volume": 0.3, "attack": 0.01, "decay": 0.6, "sustain": 0.15, "release": 1.0}}
+                    ]
+                },
+                "FM Bass": {
+                    "playback_mode": "simultaneous",
+                    "layers": [
+                        {"name": "FM Core", "config": {"frequency": 110, "wave_type": "sine", "duration": 1.0, "volume": 0.6, "attack": 0.01, "decay": 0.2, "sustain": 0.7, "release": 0.3, "advanced": {"enabled": True, "synthesis_type": "fm", "fm_mod_ratio": 1.5, "fm_mod_index": 6.0}}}
+                    ]
+                },
+                "Electric Piano FM": {
+                    "playback_mode": "simultaneous",
+                    "layers": [
+                        {"name": "FM Tines", "config": {"frequency": 261.63, "wave_type": "sine", "duration": 1.5, "volume": 0.5, "attack": 0.01, "decay": 0.4, "sustain": 0.4, "release": 0.5, "advanced": {"enabled": True, "synthesis_type": "fm", "fm_mod_ratio": 1.4, "fm_mod_index": 5.0}}},
+                        {"name": "Resonance", "config": {"frequency": 523.26, "wave_type": "sine", "duration": 1.2, "volume": 0.2, "attack": 0.02, "decay": 0.3, "sustain": 0.3, "release": 0.4}}
+                    ]
+                },
+                "Metallic Clang": {
+                    "playback_mode": "simultaneous",
+                    "layers": [
+                        {"name": "Strike", "config": {"frequency": 800, "wave_type": "sine", "duration": 1.5, "volume": 0.6, "attack": 0.001, "decay": 0.7, "sustain": 0.2, "release": 0.8, "advanced": {"enabled": True, "synthesis_type": "fm", "fm_mod_ratio": 3.7, "fm_mod_index": 12.0}}}
+                    ]
+                },
+                "Wobble Bass": {
+                    "playback_mode": "simultaneous",
+                    "layers": [
+                        {"name": "FM Wobble", "config": {"frequency": 80, "wave_type": "sine", "duration": 2.0, "volume": 0.6, "attack": 0.05, "decay": 0.2, "sustain": 0.8, "release": 0.3, "advanced": {"enabled": True, "synthesis_type": "fm", "fm_mod_ratio": 2.0, "fm_mod_index": 10.0, "lfo_enabled": True, "lfo_frequency": 5.0, "lfo_depth": 0.5}}}
+                    ]
+                }
+            },
+            "Noise & Texture": {
+                "White Noise Burst": {
+                    "playback_mode": "simultaneous",
+                    "layers": [
+                        {"name": "Noise", "config": {"frequency": 440, "wave_type": "sine", "duration": 0.5, "volume": 0.5, "attack": 0.01, "decay": 0.2, "sustain": 0.3, "release": 0.3, "advanced": {"enabled": True, "synthesis_type": "noise", "noise_type": "white", "noise_filter_enabled": True, "noise_filter_type": "bandpass", "noise_filter_low": 2000, "noise_filter_high": 8000}}}
+                    ]
+                },
+                "Wind Gust": {
+                    "playback_mode": "simultaneous",
+                    "layers": [
+                        {"name": "Wind", "config": {"frequency": 440, "wave_type": "sine", "duration": 2.0, "volume": 0.4, "attack": 0.3, "decay": 0.5, "sustain": 0.6, "release": 1.2, "advanced": {"enabled": True, "synthesis_type": "noise", "noise_type": "pink", "noise_filter_enabled": True, "noise_filter_type": "lowpass", "noise_filter_low": 500, "noise_filter_high": 2000}}}
+                    ]
+                },
+                "Ocean Waves": {
+                    "playback_mode": "simultaneous",
+                    "layers": [
+                        {"name": "Waves", "config": {"frequency": 440, "wave_type": "sine", "duration": 4.0, "volume": 0.5, "attack": 1.0, "decay": 1.0, "sustain": 0.7, "release": 2.0, "advanced": {"enabled": True, "synthesis_type": "noise", "noise_type": "brown", "noise_filter_enabled": True, "noise_filter_type": "lowpass", "noise_filter_low": 300, "noise_filter_high": 1000, "lfo_enabled": True, "lfo_frequency": 0.5, "lfo_depth": 0.3}}}
+                    ]
+                },
+                "Radio Static": {
+                    "playback_mode": "simultaneous",
+                    "layers": [
+                        {"name": "Static", "config": {"frequency": 440, "wave_type": "sine", "duration": 1.0, "volume": 0.4, "attack": 0.1, "decay": 0.3, "sustain": 0.6, "release": 0.5, "advanced": {"enabled": True, "synthesis_type": "noise", "noise_type": "white", "noise_filter_enabled": True, "noise_filter_type": "highpass", "noise_filter_low": 4000, "noise_filter_high": 12000}}}
+                    ]
+                },
+                "Thunder Rumble": {
+                    "playback_mode": "simultaneous",
+                    "layers": [
+                        {"name": "Rumble", "config": {"frequency": 440, "wave_type": "sine", "duration": 3.0, "volume": 0.6, "attack": 0.5, "decay": 1.2, "sustain": 0.5, "release": 1.8, "advanced": {"enabled": True, "synthesis_type": "noise", "noise_type": "brown", "noise_filter_enabled": True, "noise_filter_type": "lowpass", "noise_filter_low": 100, "noise_filter_high": 400}}},
+                        {"name": "Crack", "config": {"frequency": 440, "wave_type": "sine", "duration": 0.5, "volume": 0.4, "attack": 0.01, "decay": 0.2, "sustain": 0.2, "release": 0.3, "advanced": {"enabled": True, "synthesis_type": "noise", "noise_type": "white", "noise_filter_enabled": True, "noise_filter_type": "bandpass", "noise_filter_low": 2000, "noise_filter_high": 6000}}}
+                    ]
+                }
+            },
+            "LFO Effects": {
+                "Vibrato Tone": {
+                    "playback_mode": "simultaneous",
+                    "layers": [
+                        {"name": "Carrier", "config": {"frequency": 440, "wave_type": "sine", "duration": 2.0, "volume": 0.5, "attack": 0.1, "decay": 0.3, "sustain": 0.8, "release": 0.5, "advanced": {"enabled": True, "lfo_enabled": True, "lfo_frequency": 6.0, "lfo_depth": 0.4}}}
+                    ]
+                },
+                "Tremolo Pad": {
+                    "playback_mode": "simultaneous",
+                    "layers": [
+                        {"name": "Base", "config": {"frequency": 220, "wave_type": "sawtooth", "duration": 3.0, "volume": 0.5, "attack": 0.5, "decay": 0.5, "sustain": 0.8, "release": 1.0, "advanced": {"enabled": True, "lfo_enabled": True, "lfo_frequency": 4.0, "lfo_depth": 0.5}}},
+                        {"name": "Octave", "config": {"frequency": 440, "wave_type": "triangle", "duration": 3.0, "volume": 0.3, "attack": 0.5, "decay": 0.5, "sustain": 0.8, "release": 1.0}}
+                    ]
+                },
+                "Pulsing Bass": {
+                    "playback_mode": "simultaneous",
+                    "layers": [
+                        {"name": "Pulse", "config": {"frequency": 80, "wave_type": "square", "duration": 2.0, "volume": 0.6, "attack": 0.05, "decay": 0.2, "sustain": 0.7, "release": 0.3, "advanced": {"enabled": True, "lfo_enabled": True, "lfo_frequency": 8.0, "lfo_depth": 0.6}}}
+                    ]
+                },
+                "Siren": {
+                    "playback_mode": "simultaneous",
+                    "layers": [
+                        {"name": "Wail", "config": {"frequency": 600, "wave_type": "square", "duration": 3.0, "volume": 0.6, "attack": 0.1, "decay": 0.5, "sustain": 0.8, "release": 0.5, "advanced": {"enabled": True, "lfo_enabled": True, "lfo_frequency": 2.0, "lfo_depth": 0.8}}}
+                    ]
+                }
+            },
+            "Echo & Delay": {
+                "Echo Chamber": {
+                    "playback_mode": "simultaneous",
+                    "layers": [
+                        {"name": "Source", "config": {"frequency": 440, "wave_type": "sine", "duration": 1.0, "volume": 0.5, "attack": 0.01, "decay": 0.2, "sustain": 0.4, "release": 0.3, "advanced": {"enabled": True, "echo_enabled": True, "echo_delay": 0.4, "echo_feedback": 0.6}}}
+                    ]
+                },
+                "Ping Pong Delay": {
+                    "playback_mode": "simultaneous",
+                    "layers": [
+                        {"name": "Ping", "config": {"frequency": 800, "wave_type": "sine", "duration": 0.5, "volume": 0.5, "attack": 0.01, "decay": 0.15, "sustain": 0.3, "release": 0.2, "advanced": {"enabled": True, "echo_enabled": True, "echo_delay": 0.25, "echo_feedback": 0.5}}}
+                    ]
+                },
+                "Cavernous Hit": {
+                    "playback_mode": "simultaneous",
+                    "layers": [
+                        {"name": "Impact", "config": {"frequency": 200, "wave_type": "square", "duration": 0.8, "volume": 0.6, "attack": 0.01, "decay": 0.3, "sustain": 0.3, "release": 0.4, "advanced": {"enabled": True, "echo_enabled": True, "echo_delay": 0.5, "echo_feedback": 0.7}}}
+                    ]
+                },
+                "Dub Echo": {
+                    "playback_mode": "simultaneous",
+                    "layers": [
+                        {"name": "Bass", "config": {"frequency": 110, "wave_type": "sine", "duration": 1.5, "volume": 0.5, "attack": 0.05, "decay": 0.3, "sustain": 0.6, "release": 0.5, "advanced": {"enabled": True, "echo_enabled": True, "echo_delay": 0.375, "echo_feedback": 0.55}}}
+                    ]
+                }
+            },
+            "Complex": {
+                "Space Ship": {
+                    "playback_mode": "simultaneous",
+                    "layers": [
+                        {"name": "Engine", "config": {"frequency": 150, "wave_type": "sawtooth", "duration": 2.0, "volume": 0.5, "attack": 0.3, "decay": 0.5, "sustain": 0.7, "release": 0.8, "advanced": {"enabled": True, "synthesis_type": "fm", "fm_mod_ratio": 2.1, "fm_mod_index": 7.0, "lfo_enabled": True, "lfo_frequency": 3.0, "lfo_depth": 0.4}}},
+                        {"name": "Hum", "config": {"frequency": 440, "wave_type": "sine", "duration": 2.0, "volume": 0.2, "attack": 0.4, "decay": 0.4, "sustain": 0.8, "release": 0.8, "advanced": {"enabled": True, "synthesis_type": "noise", "noise_type": "pink", "noise_filter_enabled": True, "noise_filter_type": "bandpass", "noise_filter_low": 3000, "noise_filter_high": 7000}}}
+                    ]
+                },
+                "Glitch Sound": {
+                    "playback_mode": "simultaneous",
+                    "layers": [
+                        {"name": "Digital", "config": {"frequency": 880, "wave_type": "square", "duration": 0.4, "volume": 0.5, "attack": 0.001, "decay": 0.15, "sustain": 0.3, "release": 0.15, "advanced": {"enabled": True, "synthesis_type": "fm", "fm_mod_ratio": 5.5, "fm_mod_index": 15.0, "lfo_enabled": True, "lfo_frequency": 25.0, "lfo_depth": 0.7}}},
+                        {"name": "Static", "config": {"frequency": 440, "wave_type": "sine", "duration": 0.4, "volume": 0.3, "attack": 0.01, "decay": 0.12, "sustain": 0.2, "release": 0.12, "advanced": {"enabled": True, "synthesis_type": "noise", "noise_type": "white", "noise_filter_enabled": True, "noise_filter_type": "highpass", "noise_filter_low": 5000, "noise_filter_high": 10000}}}
+                    ]
+                },
+                "Sci-Fi Ambience": {
+                    "playback_mode": "simultaneous",
+                    "layers": [
+                        {"name": "Drone", "config": {"frequency": 110, "wave_type": "sawtooth", "duration": 5.0, "volume": 0.4, "attack": 1.0, "decay": 1.0, "sustain": 0.8, "release": 2.0, "advanced": {"enabled": True, "lfo_enabled": True, "lfo_frequency": 0.3, "lfo_depth": 0.4, "echo_enabled": True, "echo_delay": 0.6, "echo_feedback": 0.5}}},
+                        {"name": "Texture", "config": {"frequency": 440, "wave_type": "sine", "duration": 5.0, "volume": 0.3, "attack": 1.2, "decay": 1.0, "sustain": 0.7, "release": 2.0, "advanced": {"enabled": True, "synthesis_type": "noise", "noise_type": "pink", "noise_filter_enabled": True, "noise_filter_type": "bandpass", "noise_filter_low": 2000, "noise_filter_high": 5000, "lfo_enabled": True, "lfo_frequency": 0.5, "lfo_depth": 0.3}}}
+                    ]
+                }
+            }
         }
     }
