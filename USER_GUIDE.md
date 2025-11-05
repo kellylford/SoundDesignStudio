@@ -38,10 +38,12 @@ The executable is a complete, standalone application that includes all necessary
 ### First Steps
 
 1. **Double-click** SoundDesignStudio.exe to launch
-2. You'll see a single default layer ready to design
-3. The layer list on the right shows all properties of the current layer
-4. Press **Enter** or click **Design** to open the sound designer
+2. The document starts empty - click **"Add Layer"** or press **Ctrl+L** to begin
+3. Design your layer by pressing **Enter** or clicking **"Design"**
+4. Configure your sound parameters in the design dialog
 5. Press **Alt+P** to play your sound
+
+**Tip:** New layers start blank (silent) so you can build from scratch, or use **Presets** (Alt+R) to add pre-made sounds.
 
 ---
 
@@ -129,6 +131,23 @@ The layer list displays all properties of the **currently selected layer**:
 
 ### Design Dialog Tabs
 
+#### Getting Help on Parameters
+
+**Context-Sensitive Help (Shift+F1)**
+
+Every parameter in the design dialog has detailed help available:
+
+1. **Focus on a parameter** (click on it or use Tab to navigate)
+2. **Press Shift+F1** to see detailed help
+3. A help dialog appears with:
+   - **Description**: What the parameter does
+   - **Details**: Technical information and ranges
+   - **Tips**: Practical advice and common values
+
+The help information is stored in `parameter_help.json` and can be easily edited to customize the help text.
+
+**Screen Reader Friendly**: Help text is displayed in a list format for excellent screen reader compatibility.
+
 #### 1. Basic Tab
 
 **Frequency**: 20-2000 Hz
@@ -185,20 +204,26 @@ Add richness and complexity by mixing in related frequencies:
 - Deep bass: High sub-bass, low octave
 - Bright effects: High octave, moderate fifth
 
-#### 4. Advanced Tab
+#### 4. FM Synthesis Tab
 
-**Enable Advanced Synthesis**: Unlock additional synthesis techniques
+**Modulator Ratio**: Frequency relationship between carrier and modulator (0.5-5.0)
+- Integer ratios create harmonic sounds
+- Non-integer ratios create bell-like tones
+- Try: 1.4 for bells, 14 for electric piano
 
-**Synthesis Type**: fm, noise, karplus-strong
-- **FM (Frequency Modulation)**: Complex harmonic tones
-- **Noise**: White, pink, or brown noise generation
-- **Karplus-Strong**: String/pluck simulation
+**Modulation Index**: Intensity of modulation (0-10)
+- Low (0-2): Subtle modulation
+- Medium (3-5): Rich harmonics
+- High (6-10): Complex, bright tones
 
-**FM Synthesis:**
-- Modulation Ratio: Frequency relationship (0.1-10.0)
-- Modulation Index: Intensity of modulation (0-20)
+#### 5. Noise Tab
 
-**Noise Generation:**
+**Noise Type**: white, pink, brown
+- **White**: Equal energy at all frequencies (hi-hats, cymbals)
+- **Pink**: More bass energy (ocean, wind)
+- **Brown**: Heavy bass (thunder, rumble)
+
+**Noise Filter**: Optional filtering
 - Noise Type: white, pink, brown
 - Filter: Bandpass, lowpass, highpass
 - Cutoff: Frequency range (20-20000 Hz)
@@ -402,6 +427,7 @@ See **EXPORT_GUIDE.md** for detailed integration instructions.
 | Shortcut | Action |
 |----------|--------|
 | **Ctrl+D** | Open designer |
+| **Shift+F1** | Context-sensitive help on focused parameter |
 | **Tab** | Navigate between fields |
 | **Space** | Play preview in dialog |
 

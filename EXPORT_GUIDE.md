@@ -8,16 +8,6 @@
 3. Choose where to save your `.wav` file
 4. Done! Your sound is now a standard WAV audio file
 
-### Where to Use WAV Files
-✅ **Any audio software** (Audacity, Adobe Audition, FL Studio, etc.)
-✅ **Video editors** (Premiere, Final Cut, DaVinci Resolve, etc.)
-✅ **Game engines** (Unity, Unreal, Godot, etc.)
-✅ **Mobile apps** (iOS, Android)
-✅ **Web applications** (HTML5 audio, JavaScript)
-✅ **Windows Media Player, VLC**, any media player
-✅ **PowerPoint, Keynote** presentations
-✅ **Your sports app!** 🏈⚾🏀
-
 ---
 
 ## Export Options

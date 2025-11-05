@@ -39,12 +39,6 @@ from typing import List, Dict, Any
 from simple_audio_player import EnhancedAudioPlayer, PlayAudioConfig
 from preset_library import get_preset_library
 
-# Advanced synthesis is available but optional
-try:
-    from advanced_synthesis import AdvancedSynthesis
-except ImportError:
-    AdvancedSynthesis = None
-
 
 class SoundLayer:
     """Represents a single sound layer in a multi-layer sound composition."""
@@ -155,11 +149,10 @@ class SoundDocument:
         self.playback_mode = "sequential"  # "sequential" or "simultaneous"
         self.file_path = None
         
-        # Start with one default layer
-        self.add_layer("Layer 1")
+        # Start with no layers - user must add them
     
-    def add_layer(self, name=None, blank=False):
-        """Add a new sound layer to this document."""
+    def add_layer(self, name=None, blank=True):
+        """Add a new sound layer to this document. New layers are blank by default."""
         if name is None:
             name = f"Layer {len(self.layers) + 1}"
         layer = SoundLayer(name, blank=blank)
@@ -167,8 +160,8 @@ class SoundDocument:
         return layer
     
     def remove_layer(self, index):
-        """Remove a layer by index."""
-        if 0 <= index < len(self.layers) and len(self.layers) > 1:
+        """Remove a layer by index. Can now remove all layers."""
+        if 0 <= index < len(self.layers):
             del self.layers[index]
             return True
         return False
@@ -198,10 +191,87 @@ class SoundDocument:
             layer.config = layer_data.get('config', layer._default_config())
             doc.layers.append(layer)
         
-        if not doc.layers:
-            doc.add_layer("Layer 1")
+        # Don't add a default layer - allow empty documents
         
         return doc
+
+
+def load_parameter_help():
+    """Load parameter help from JSON file."""
+    help_file = Path(__file__).parent / "parameter_help.json"
+    try:
+        with open(help_file, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print(f"Warning: parameter_help.json not found at {help_file}")
+        return {}
+    except json.JSONDecodeError as e:
+        print(f"Warning: Error parsing parameter_help.json: {e}")
+        return {}
+
+
+class ParameterHelpDialog(QDialog):
+    """Dialog for displaying context-sensitive parameter help."""
+    
+    def __init__(self, parameter_key, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Parameter Help")
+        self.setMinimumSize(500, 400)
+        
+        layout = QVBoxLayout(self)
+        
+        # Load help data from JSON file
+        parameter_help = load_parameter_help()
+        
+        # Get help information
+        help_info = parameter_help.get(parameter_key, {
+            'title': 'Help',
+            'description': 'No help available for this parameter.',
+            'details': [],
+            'tips': ''
+        })
+        
+        # Title
+        title_label = QLabel(f"<h2>{help_info['title']}</h2>")
+        layout.addWidget(title_label)
+        
+        # Create list widget for screen reader compatibility
+        help_list = QListWidget()
+        help_list.setWordWrap(True)
+        
+        # Description
+        desc_item = QListWidgetItem(f"📖 {help_info['description']}")
+        help_list.addItem(desc_item)
+        
+        # Details
+        if help_info.get('details'):
+            help_list.addItem(QListWidgetItem(""))  # Spacer
+            header_item = QListWidgetItem("Details:")
+            header_item.setFlags(header_item.flags() & ~Qt.ItemFlag.ItemIsSelectable)
+            help_list.addItem(header_item)
+            
+            for detail in help_info['details']:
+                detail_item = QListWidgetItem(f"  • {detail}")
+                help_list.addItem(detail_item)
+        
+        # Tips
+        if help_info.get('tips'):
+            help_list.addItem(QListWidgetItem(""))  # Spacer
+            tip_header = QListWidgetItem("💡 Tips:")
+            tip_header.setFlags(tip_header.flags() & ~Qt.ItemFlag.ItemIsSelectable)
+            help_list.addItem(tip_header)
+            tip_item = QListWidgetItem(f"  {help_info['tips']}")
+            help_list.addItem(tip_item)
+        
+        layout.addWidget(help_list)
+        
+        # Close button
+        close_btn = QPushButton("Close")
+        close_btn.clicked.connect(self.accept)
+        layout.addWidget(close_btn)
+        
+        # Set first item as selected
+        help_list.setCurrentRow(0)
 
 
 class PresetPreviewDialog(QDialog):
@@ -364,8 +434,18 @@ class DesignDialog(QDialog):
         self.setWindowTitle(f"Design - {layer.name}")
         self.setMinimumSize(900, 700)
         
+        # Map widgets to help keys for context-sensitive help
+        self.widget_help_map = {}
+        
         self.setup_ui()
         self.load_config_to_ui()
+        self.setup_help_system()
+    
+    def setup_help_system(self):
+        """Setup Shift+F1 context-sensitive help."""
+        # Create shortcut for Shift+F1
+        help_shortcut = QShortcut(QKeySequence("Shift+F1"), self)
+        help_shortcut.activated.connect(self.show_context_help)
     
     def setup_ui(self):
         """Build the design interface."""
@@ -392,7 +472,9 @@ class DesignDialog(QDialog):
         self.build_basic_tab(tabs)
         self.build_envelope_tab(tabs)
         self.build_harmonics_tab(tabs)
-        self.build_advanced_tab(tabs)
+        self.build_fm_tab(tabs)
+        self.build_noise_tab(tabs)
+        self.build_effects_tab(tabs)
         
         layout.addWidget(tabs)
         
@@ -427,6 +509,7 @@ class DesignDialog(QDialog):
         self.freq_spin.setRange(20, 2000)
         self.freq_spin.setValue(440)
         self.freq_spin.setSuffix(" Hz")
+        self.widget_help_map[self.freq_spin] = 'frequency'
         freq_layout.addWidget(self.freq_spin)
         freq_group.setLayout(freq_layout)
         layout.addWidget(freq_group)
@@ -436,6 +519,7 @@ class DesignDialog(QDialog):
         wave_layout = QVBoxLayout()
         self.wave_combo = QComboBox()
         self.wave_combo.addItems(['sine', 'square', 'sawtooth', 'triangle'])
+        self.widget_help_map[self.wave_combo] = 'waveform'
         wave_layout.addWidget(self.wave_combo)
         wave_group.setLayout(wave_layout)
         layout.addWidget(wave_group)
@@ -448,6 +532,7 @@ class DesignDialog(QDialog):
         self.duration_spin.setValue(0.5)
         self.duration_spin.setSuffix(" sec")
         self.duration_spin.setSingleStep(0.1)
+        self.widget_help_map[self.duration_spin] = 'duration'
         dur_layout.addWidget(self.duration_spin)
         dur_group.setLayout(dur_layout)
         layout.addWidget(dur_group)
@@ -459,6 +544,7 @@ class DesignDialog(QDialog):
         self.volume_spin.setRange(0.0, 1.0)
         self.volume_spin.setValue(0.3)
         self.volume_spin.setSingleStep(0.1)
+        self.widget_help_map[self.volume_spin] = 'volume'
         vol_layout.addWidget(self.volume_spin)
         vol_group.setLayout(vol_layout)
         layout.addWidget(vol_group)
@@ -475,6 +561,7 @@ class DesignDialog(QDialog):
         self.overlap_spin.setValue(0.0)
         self.overlap_spin.setSuffix(" sec")
         self.overlap_spin.setSingleStep(0.05)
+        self.widget_help_map[self.overlap_spin] = 'overlap'
         overlap_layout.addWidget(self.overlap_spin)
         overlap_group.setLayout(overlap_layout)
         layout.addWidget(overlap_group)
@@ -491,6 +578,12 @@ class DesignDialog(QDialog):
         self.decay_spin = self._create_param_spin("Decay", 0.0, 1.0, 0.1, 0.01)
         self.sustain_spin = self._create_param_spin("Sustain", 0.0, 1.0, 0.7, 0.1)
         self.release_spin = self._create_param_spin("Release", 0.0, 1.0, 0.15, 0.01)
+        
+        # Register help for envelope parameters
+        self.widget_help_map[self.attack_spin[1]] = 'attack'
+        self.widget_help_map[self.decay_spin[1]] = 'decay'
+        self.widget_help_map[self.sustain_spin[1]] = 'sustain'
+        self.widget_help_map[self.release_spin[1]] = 'release'
         
         layout.addWidget(self.attack_spin[0])
         layout.addWidget(self.decay_spin[0])
@@ -520,162 +613,187 @@ class DesignDialog(QDialog):
         
         tabs.addTab(harmonics_tab, "Harmonics")
     
-    def build_advanced_tab(self, tabs):
-        """Build advanced synthesis tab."""
-        advanced_tab = QWidget()
-        layout = QVBoxLayout(advanced_tab)
+    def build_fm_tab(self, tabs):
+        """Build FM synthesis tab."""
+        fm_tab = QWidget()
+        layout = QVBoxLayout(fm_tab)
         
-        # Enable checkbox
-        self.advanced_enabled = QCheckBox("Enable Advanced Synthesis")
-        self.advanced_enabled.setChecked(False)
-        layout.addWidget(self.advanced_enabled)
+        info_label = QLabel("FM (Frequency Modulation) synthesis creates complex harmonic timbres by using one oscillator to modulate the frequency of another.")
+        info_label.setWordWrap(True)
+        info_label.setStyleSheet("color: #666; font-style: italic; margin-bottom: 10px;")
+        layout.addWidget(info_label)
         
-        # Synthesis type selector
-        synth_type_group = QGroupBox("Synthesis Type")
-        synth_type_layout = QVBoxLayout()
-        synth_type_layout.addWidget(QLabel("Choose synthesis method:"))
-        self.synth_type_combo = QComboBox()
-        self.synth_type_combo.addItems(['fm', 'noise', 'karplus'])
-        self.synth_type_combo.currentTextChanged.connect(self.on_synthesis_type_changed)
-        synth_type_layout.addWidget(self.synth_type_combo)
-        synth_type_group.setLayout(synth_type_layout)
-        layout.addWidget(synth_type_group)
-        
-        # FM Synthesis controls
-        self.fm_group = QGroupBox("FM Synthesis Parameters")
-        fm_layout = QVBoxLayout()
-        
-        fm_layout.addWidget(QLabel("Modulator Ratio:"))
+        # FM parameters
+        layout.addWidget(QLabel("Modulator Ratio:"))
         self.fm_ratio_spin = QDoubleSpinBox()
         self.fm_ratio_spin.setRange(0.5, 5.0)
         self.fm_ratio_spin.setValue(1.4)
         self.fm_ratio_spin.setSingleStep(0.1)
-        fm_layout.addWidget(self.fm_ratio_spin)
+        self.widget_help_map[self.fm_ratio_spin] = 'fm_ratio'
+        layout.addWidget(self.fm_ratio_spin)
         
-        fm_layout.addWidget(QLabel("Modulation Index:"))
+        layout.addWidget(QLabel("Modulation Index:"))
         self.fm_index_spin = QDoubleSpinBox()
         self.fm_index_spin.setRange(0.0, 10.0)
         self.fm_index_spin.setValue(5.0)
         self.fm_index_spin.setSingleStep(0.5)
-        fm_layout.addWidget(self.fm_index_spin)
+        self.widget_help_map[self.fm_index_spin] = 'fm_index'
+        layout.addWidget(self.fm_index_spin)
         
+        # Quick presets guide
+        presets_group = QGroupBox("Quick FM Presets")
+        presets_layout = QVBoxLayout()
         fm_desc = QLabel(
-            "FM Synthesis presets:\n"
-            "• Ratio 1.4, Index 5 = Bell\n"
-            "• Ratio 14, Index 3 = Electric Piano\n"
-            "• Ratio 1, Index 5 = Brass\n"
-            "• Ratio 0.5, Index 2 = Organ"
+            "Common FM combinations:\n\n"
+            "• Ratio 1.4, Index 5 → Bell-like tone\n"
+            "• Ratio 14, Index 3 → Electric Piano\n"
+            "• Ratio 1, Index 5 → Brass instrument\n"
+            "• Ratio 0.5, Index 2 → Organ sound"
         )
         fm_desc.setWordWrap(True)
-        fm_desc.setStyleSheet("color: #666; font-size: 9pt;")
-        fm_layout.addWidget(fm_desc)
-        self.fm_group.setLayout(fm_layout)
-        layout.addWidget(self.fm_group)
+        presets_layout.addWidget(fm_desc)
+        presets_group.setLayout(presets_layout)
+        layout.addWidget(presets_group)
         
-        # Noise controls
-        self.noise_group = QGroupBox("Noise Generator")
-        noise_layout = QVBoxLayout()
+        layout.addStretch()
+        tabs.addTab(fm_tab, "FM Synthesis")
+    
+    def build_noise_tab(self, tabs):
+        """Build noise synthesis tab."""
+        noise_tab = QWidget()
+        layout = QVBoxLayout(noise_tab)
         
-        noise_layout.addWidget(QLabel("Noise Type:"))
+        info_label = QLabel("Noise generators create random waveforms useful for percussion, wind, and atmospheric effects.")
+        info_label.setWordWrap(True)
+        info_label.setStyleSheet("color: #666; font-style: italic; margin-bottom: 10px;")
+        layout.addWidget(info_label)
+        
+        # Noise type
+        layout.addWidget(QLabel("Noise Type:"))
         self.noise_type_combo = QComboBox()
         self.noise_type_combo.addItems(['white', 'pink', 'brown'])
-        noise_layout.addWidget(self.noise_type_combo)
+        self.widget_help_map[self.noise_type_combo] = 'noise_type'
+        layout.addWidget(self.noise_type_combo)
+        
+        noise_desc = QLabel(
+            "• White: Equal energy across all frequencies (hi-hats, cymbals)\n"
+            "• Pink: More energy in lower frequencies (ocean waves, wind)\n"
+            "• Brown: Even more bass energy (thunder, rumble)"
+        )
+        noise_desc.setWordWrap(True)
+        noise_desc.setStyleSheet("color: #666; font-size: 9pt; margin: 10px 0;")
+        layout.addWidget(noise_desc)
+        
+        # Filter controls
+        filter_group = QGroupBox("Noise Filter")
+        filter_layout = QVBoxLayout()
         
         self.noise_filter_enabled = QCheckBox("Enable Noise Filter")
-        noise_layout.addWidget(self.noise_filter_enabled)
+        self.widget_help_map[self.noise_filter_enabled] = 'noise_filter'
+        filter_layout.addWidget(self.noise_filter_enabled)
         
-        noise_layout.addWidget(QLabel("Filter Type:"))
+        filter_layout.addWidget(QLabel("Filter Type:"))
         self.noise_filter_combo = QComboBox()
         self.noise_filter_combo.addItems(['bandpass', 'highpass', 'lowpass'])
-        noise_layout.addWidget(self.noise_filter_combo)
+        filter_layout.addWidget(self.noise_filter_combo)
         
-        noise_layout.addWidget(QLabel("Filter Low Cutoff (Hz):"))
+        filter_layout.addWidget(QLabel("Filter Low Cutoff (Hz):"))
         self.filter_low_spin = QDoubleSpinBox()
         self.filter_low_spin.setRange(100, 10000)
         self.filter_low_spin.setValue(2000)
         self.filter_low_spin.setSuffix(" Hz")
-        noise_layout.addWidget(self.filter_low_spin)
+        filter_layout.addWidget(self.filter_low_spin)
         
-        noise_layout.addWidget(QLabel("Filter High Cutoff (Hz):"))
+        filter_layout.addWidget(QLabel("Filter High Cutoff (Hz):"))
         self.filter_high_spin = QDoubleSpinBox()
         self.filter_high_spin.setRange(100, 10000)
         self.filter_high_spin.setValue(8000)
         self.filter_high_spin.setSuffix(" Hz")
-        noise_layout.addWidget(self.filter_high_spin)
+        filter_layout.addWidget(self.filter_high_spin)
         
-        noise_desc = QLabel(
-            "Noise types:\n"
-            "• White: Hi-hats, cymbals\n"
-            "• Pink: Ocean, wind\n"
-            "• Brown: Thunder, rumble"
-        )
-        noise_desc.setWordWrap(True)
-        noise_desc.setStyleSheet("color: #666; font-size: 9pt;")
-        noise_layout.addWidget(noise_desc)
-        self.noise_group.setLayout(noise_layout)
-        layout.addWidget(self.noise_group)
+        filter_group.setLayout(filter_layout)
+        layout.addWidget(filter_group)
         
-        # Effects controls
-        effects_group = QGroupBox("Effects")
-        effects_layout = QVBoxLayout()
+        layout.addStretch()
+        tabs.addTab(noise_tab, "Noise")
+    
+    def build_effects_tab(self, tabs):
+        """Build effects tab."""
+        effects_tab = QWidget()
+        layout = QVBoxLayout(effects_tab)
         
-        # LFO
+        info_label = QLabel("Apply modulation and time-based effects to any sound.")
+        info_label.setWordWrap(True)
+        info_label.setStyleSheet("color: #666; font-style: italic; margin-bottom: 10px;")
+        layout.addWidget(info_label)
+        
+        # LFO controls
+        lfo_group = QGroupBox("LFO Tremolo")
+        lfo_layout = QVBoxLayout()
+        
         self.lfo_enabled = QCheckBox("Enable LFO Tremolo")
-        effects_layout.addWidget(self.lfo_enabled)
+        self.widget_help_map[self.lfo_enabled] = 'lfo'
+        lfo_layout.addWidget(self.lfo_enabled)
         
-        effects_layout.addWidget(QLabel("LFO Frequency (Hz):"))
+        lfo_layout.addWidget(QLabel("LFO Frequency (Hz):"))
         self.lfo_freq_spin = QDoubleSpinBox()
         self.lfo_freq_spin.setRange(0.5, 10.0)
         self.lfo_freq_spin.setValue(5.0)
         self.lfo_freq_spin.setSingleStep(0.5)
-        effects_layout.addWidget(self.lfo_freq_spin)
+        self.widget_help_map[self.lfo_freq_spin] = 'lfo'
+        lfo_layout.addWidget(self.lfo_freq_spin)
         
-        effects_layout.addWidget(QLabel("LFO Depth (%):"))
+        lfo_layout.addWidget(QLabel("LFO Depth (%):"))
         self.lfo_depth_spin = QDoubleSpinBox()
         self.lfo_depth_spin.setRange(0, 100)
         self.lfo_depth_spin.setValue(30)
         self.lfo_depth_spin.setSuffix("%")
-        effects_layout.addWidget(self.lfo_depth_spin)
+        self.widget_help_map[self.lfo_depth_spin] = 'lfo'
+        lfo_layout.addWidget(self.lfo_depth_spin)
         
-        # Echo
+        lfo_desc = QLabel("Tremolo creates rhythmic volume variations. Try 5-8 Hz for vibrato effects.")
+        lfo_desc.setWordWrap(True)
+        lfo_desc.setStyleSheet("color: #666; font-size: 9pt;")
+        lfo_layout.addWidget(lfo_desc)
+        
+        lfo_group.setLayout(lfo_layout)
+        layout.addWidget(lfo_group)
+        
+        # Echo controls
+        echo_group = QGroupBox("Echo / Delay")
+        echo_layout = QVBoxLayout()
+        
         self.echo_enabled = QCheckBox("Enable Echo/Delay")
-        effects_layout.addWidget(self.echo_enabled)
+        self.widget_help_map[self.echo_enabled] = 'echo'
+        echo_layout.addWidget(self.echo_enabled)
         
-        effects_layout.addWidget(QLabel("Echo Delay (seconds):"))
+        echo_layout.addWidget(QLabel("Echo Delay (seconds):"))
         self.echo_delay_spin = QDoubleSpinBox()
         self.echo_delay_spin.setRange(0.05, 1.0)
         self.echo_delay_spin.setValue(0.3)
         self.echo_delay_spin.setSingleStep(0.05)
         self.echo_delay_spin.setSuffix(" sec")
-        effects_layout.addWidget(self.echo_delay_spin)
+        self.widget_help_map[self.echo_delay_spin] = 'echo'
+        echo_layout.addWidget(self.echo_delay_spin)
         
-        effects_layout.addWidget(QLabel("Echo Feedback (%):"))
+        echo_layout.addWidget(QLabel("Echo Feedback (%):"))
         self.echo_feedback_spin = QDoubleSpinBox()
         self.echo_feedback_spin.setRange(0, 90)
         self.echo_feedback_spin.setValue(40)
         self.echo_feedback_spin.setSuffix("%")
-        effects_layout.addWidget(self.echo_feedback_spin)
+        self.widget_help_map[self.echo_feedback_spin] = 'echo'
+        echo_layout.addWidget(self.echo_feedback_spin)
         
-        effects_group.setLayout(effects_layout)
-        layout.addWidget(effects_group)
+        echo_desc = QLabel("Echo creates repeating delays. Lower feedback for subtle echoes, higher for dramatic repeats.")
+        echo_desc.setWordWrap(True)
+        echo_desc.setStyleSheet("color: #666; font-size: 9pt;")
+        echo_layout.addWidget(echo_desc)
+        
+        echo_group.setLayout(echo_layout)
+        layout.addWidget(echo_group)
         
         layout.addStretch()
-        tabs.addTab(advanced_tab, "Advanced")
-    
-    def on_synthesis_type_changed(self, synth_type):
-        """Handle synthesis type change - show/hide relevant controls."""
-        # Hide all type-specific groups first
-        self.fm_group.setVisible(False)
-        self.noise_group.setVisible(False)
-        
-        # Show the selected type's controls
-        if synth_type == 'fm':
-            self.fm_group.setVisible(True)
-        elif synth_type == 'noise':
-            self.noise_group.setVisible(True)
-        elif synth_type == 'karplus':
-            # Karplus-Strong has no extra parameters beyond basic
-            pass
+        tabs.addTab(effects_tab, "Effects")
     
     def _create_param_spin(self, label, min_val, max_val, default, step):
         """Create a parameter spinbox with label."""
@@ -707,9 +825,7 @@ class DesignDialog(QDialog):
         self.fifth_spin[1].setValue(cfg['harmonics']['fifth_volume'])
         self.subbass_spin[1].setValue(cfg['harmonics']['sub_bass_volume'])
         
-        # Advanced synthesis
-        self.advanced_enabled.setChecked(cfg['advanced']['enabled'])
-        self.synth_type_combo.setCurrentText(cfg['advanced'].get('synthesis_type', 'fm'))
+        # Synthesis parameters
         self.fm_ratio_spin.setValue(cfg['advanced'].get('fm_mod_ratio', 1.4))
         self.fm_index_spin.setValue(cfg['advanced'].get('fm_mod_index', 5.0))
         self.noise_type_combo.setCurrentText(cfg['advanced'].get('noise_type', 'white'))
@@ -723,9 +839,6 @@ class DesignDialog(QDialog):
         self.echo_enabled.setChecked(cfg['advanced'].get('echo_enabled', False))
         self.echo_delay_spin.setValue(cfg['advanced'].get('echo_delay', 0.3))
         self.echo_feedback_spin.setValue(cfg['advanced'].get('echo_feedback', 0.4) * 100)  # Convert to percentage
-        
-        # Update visibility of synthesis type controls
-        self.on_synthesis_type_changed(cfg['advanced'].get('synthesis_type', 'fm'))
     
     def apply_changes(self):
         """Apply UI changes back to layer config."""
@@ -747,9 +860,7 @@ class DesignDialog(QDialog):
         cfg['harmonics']['fifth_volume'] = self.fifth_spin[1].value()
         cfg['harmonics']['sub_bass_volume'] = self.subbass_spin[1].value()
         
-        # Advanced synthesis
-        cfg['advanced']['enabled'] = self.advanced_enabled.isChecked()
-        cfg['advanced']['synthesis_type'] = self.synth_type_combo.currentText()
+        # Synthesis parameters - save all values
         cfg['advanced']['fm_mod_ratio'] = self.fm_ratio_spin.value()
         cfg['advanced']['fm_mod_index'] = self.fm_index_spin.value()
         cfg['advanced']['noise_type'] = self.noise_type_combo.currentText()
@@ -766,6 +877,37 @@ class DesignDialog(QDialog):
         
         # Notify parent to refresh
         self.parent_studio.refresh_layer_list()
+    
+    def show_context_help(self):
+        """Show help for the currently focused widget."""
+        focused_widget = self.focusWidget()
+        
+        # Find the help key for this widget
+        help_key = self.widget_help_map.get(focused_widget)
+        
+        # If not found, check parent widget (for spinbox internal widgets)
+        if not help_key and focused_widget:
+            parent = focused_widget.parent()
+            help_key = self.widget_help_map.get(parent)
+            
+            # Also check grandparent (for deeply nested widgets)
+            if not help_key and parent:
+                grandparent = parent.parent()
+                help_key = self.widget_help_map.get(grandparent)
+        
+        if help_key:
+            dialog = ParameterHelpDialog(help_key, self)
+            dialog.exec()
+        else:
+            # Show general help message with widget info for debugging
+            widget_info = f"Focused widget: {type(focused_widget).__name__}" if focused_widget else "No widget focused"
+            QMessageBox.information(
+                self,
+                "Help",
+                f"Press Shift+F1 while focused on a parameter control to see detailed help.\n\n"
+                f"You can navigate through controls with Tab key and use Shift+F1 on any parameter.\n\n"
+                f"({widget_info})"
+            )
     
     def play_preview(self):
         """Play preview of this layer."""
@@ -1147,13 +1289,19 @@ class SoundDesignStudioV2(QMainWindow):
         if self.current_layer_index >= len(self.document.layers):
             self.current_layer_index = max(0, len(self.document.layers) - 1)
         
-        # If no layers, show nothing
+        # If no layers, show a helpful message
         if not self.document.layers:
+            empty_item = QListWidgetItem("No layers yet. Press Ctrl+L to add a layer or click 'Add Layer'.")
+            empty_item.setFlags(empty_item.flags() & ~Qt.ItemFlag.ItemIsSelectable)
+            self.layer_list.addItem(empty_item)
             return
         
         # Display only the current layer with all its properties
         layer = self.document.layers[self.current_layer_index]
         cfg = layer.config
+        
+        # Check if layer is blank (volume is 0)
+        is_blank = cfg.get('volume', 0.0) == 0.0
         
         # Layer header
         header = QListWidgetItem(f"═══ Layer {self.current_layer_index + 1}/{len(self.document.layers)} ═══")
@@ -1163,56 +1311,73 @@ class SoundDesignStudioV2(QMainWindow):
         # Layer name (selectable)
         self.layer_list.addItem(QListWidgetItem(f"  Name: {layer.name}"))
         
-        # Basic parameters
-        self.layer_list.addItem(QListWidgetItem(f"  Frequency: {cfg['frequency']:.1f} Hz"))
-        self.layer_list.addItem(QListWidgetItem(f"  Waveform: {cfg['wave_type']}"))
-        self.layer_list.addItem(QListWidgetItem(f"  Duration: {cfg['duration']:.2f} s"))
-        self.layer_list.addItem(QListWidgetItem(f"  Volume: {cfg['volume']:.2f}"))
-        self.layer_list.addItem(QListWidgetItem(f"  Overlap: {cfg.get('overlap', 0.0):.2f} s"))
-        
-        # ADSR Envelope
-        self.layer_list.addItem(QListWidgetItem(f"  Attack: {cfg['attack']:.3f} s"))
-        self.layer_list.addItem(QListWidgetItem(f"  Decay: {cfg['decay']:.3f} s"))
-        self.layer_list.addItem(QListWidgetItem(f"  Sustain: {cfg['sustain']:.2f}"))
-        self.layer_list.addItem(QListWidgetItem(f"  Release: {cfg['release']:.3f} s"))
-        
-        # Harmonics
-        if cfg.get('harmonics', {}).get('enabled'):
-            self.layer_list.addItem(QListWidgetItem(f"  Harmonics: ON"))
-            self.layer_list.addItem(QListWidgetItem(f"    Octave: {cfg['harmonics'].get('octave_volume', 0):.2f}"))
-            self.layer_list.addItem(QListWidgetItem(f"    Fifth: {cfg['harmonics'].get('fifth_volume', 0):.2f}"))
-            self.layer_list.addItem(QListWidgetItem(f"    Sub-bass: {cfg['harmonics'].get('sub_bass_volume', 0):.2f}"))
+        if is_blank:
+            # Show parameter names without values for blank layers
+            self.layer_list.addItem(QListWidgetItem(f"  Frequency: (not set)"))
+            self.layer_list.addItem(QListWidgetItem(f"  Waveform: (not set)"))
+            self.layer_list.addItem(QListWidgetItem(f"  Duration: (not set)"))
+            self.layer_list.addItem(QListWidgetItem(f"  Volume: (not set)"))
+            self.layer_list.addItem(QListWidgetItem(f"  Overlap: (not set)"))
+            self.layer_list.addItem(QListWidgetItem(f"  Attack: (not set)"))
+            self.layer_list.addItem(QListWidgetItem(f"  Decay: (not set)"))
+            self.layer_list.addItem(QListWidgetItem(f"  Sustain: (not set)"))
+            self.layer_list.addItem(QListWidgetItem(f"  Release: (not set)"))
+            self.layer_list.addItem(QListWidgetItem(f"  Harmonics: (not set)"))
+            self.layer_list.addItem(QListWidgetItem(f"  Synthesis: (not set)"))
+            self.layer_list.addItem(QListWidgetItem(f"  Effects: (not set)"))
+            
+            # Add helpful message
+            hint = QListWidgetItem("  → Press Enter or click 'Design' to configure")
+            hint.setFlags(hint.flags() & ~Qt.ItemFlag.ItemIsSelectable)
+            self.layer_list.addItem(hint)
         else:
-            self.layer_list.addItem(QListWidgetItem(f"  Harmonics: OFF"))
-        
-        # Advanced Synthesis
-        adv = cfg.get('advanced', {})
-        if adv.get('enabled'):
-            synth_type = adv.get('synthesis_type', 'fm').upper()
-            self.layer_list.addItem(QListWidgetItem(f"  Advanced: {synth_type}"))
+            # Show actual values for configured layers
+            # Basic parameters
+            self.layer_list.addItem(QListWidgetItem(f"  Frequency: {cfg['frequency']:.1f} Hz"))
+            self.layer_list.addItem(QListWidgetItem(f"  Waveform: {cfg['wave_type']}"))
+            self.layer_list.addItem(QListWidgetItem(f"  Duration: {cfg['duration']:.2f} s"))
+            self.layer_list.addItem(QListWidgetItem(f"  Volume: {cfg['volume']:.2f}"))
+            self.layer_list.addItem(QListWidgetItem(f"  Overlap: {cfg.get('overlap', 0.0):.2f} s"))
             
-            # Show type-specific parameters
-            if adv.get('synthesis_type') == 'fm':
-                self.layer_list.addItem(QListWidgetItem(f"    FM Ratio: {adv.get('fm_mod_ratio', 1.4):.2f}"))
-                self.layer_list.addItem(QListWidgetItem(f"    FM Index: {adv.get('fm_mod_index', 5.0):.2f}"))
-            elif adv.get('synthesis_type') == 'noise':
-                noise_type = adv.get('noise_type', 'white')
-                self.layer_list.addItem(QListWidgetItem(f"    Noise: {noise_type}"))
-                if adv.get('noise_filter_enabled'):
-                    filter_type = adv.get('noise_filter_type', 'bandpass')
-                    self.layer_list.addItem(QListWidgetItem(f"    Filter: {filter_type}"))
-                    self.layer_list.addItem(QListWidgetItem(f"    Low: {adv.get('noise_filter_low', 2000):.0f} Hz"))
-                    self.layer_list.addItem(QListWidgetItem(f"    High: {adv.get('noise_filter_high', 8000):.0f} Hz"))
-            elif adv.get('synthesis_type') == 'karplus':
-                self.layer_list.addItem(QListWidgetItem(f"    Type: Karplus-Strong"))
+            # ADSR Envelope
+            self.layer_list.addItem(QListWidgetItem(f"  Attack: {cfg['attack']:.3f} s"))
+            self.layer_list.addItem(QListWidgetItem(f"  Decay: {cfg['decay']:.3f} s"))
+            self.layer_list.addItem(QListWidgetItem(f"  Sustain: {cfg['sustain']:.2f}"))
+            self.layer_list.addItem(QListWidgetItem(f"  Release: {cfg['release']:.3f} s"))
             
-            # Show effects if enabled
+            # Harmonics
+            self.layer_list.addItem(QListWidgetItem(f"  Harmonics Enabled: {'ON' if cfg.get('harmonics', {}).get('enabled') else 'OFF'}"))
+            if cfg.get('harmonics', {}).get('enabled'):
+                self.layer_list.addItem(QListWidgetItem(f"    Octave: {cfg['harmonics'].get('octave_volume', 0):.2f}"))
+                self.layer_list.addItem(QListWidgetItem(f"    Fifth: {cfg['harmonics'].get('fifth_volume', 0):.2f}"))
+                self.layer_list.addItem(QListWidgetItem(f"    Sub-bass: {cfg['harmonics'].get('sub_bass_volume', 0):.2f}"))
+            
+            # Synthesis Parameters - show all types
+            adv = cfg.get('advanced', {})
+            
+            # FM Synthesis
+            fm_ratio = adv.get('fm_mod_ratio', 1.4)
+            fm_index = adv.get('fm_mod_index', 5.0)
+            self.layer_list.addItem(QListWidgetItem(f"  FM Synthesis:"))
+            self.layer_list.addItem(QListWidgetItem(f"    Ratio: {fm_ratio:.2f}, Index: {fm_index:.2f}"))
+            
+            # Noise
+            noise_type = adv.get('noise_type', 'white')
+            self.layer_list.addItem(QListWidgetItem(f"  Noise: {noise_type}"))
+            if adv.get('noise_filter_enabled'):
+                filter_type = adv.get('noise_filter_type', 'bandpass')
+                low_cut = adv.get('noise_filter_low', 2000)
+                high_cut = adv.get('noise_filter_high', 8000)
+                self.layer_list.addItem(QListWidgetItem(f"    Filter: {filter_type} ({low_cut:.0f}-{high_cut:.0f} Hz)"))
+            
+            # Effects
+            self.layer_list.addItem(QListWidgetItem(f"  LFO: {'ON' if adv.get('lfo_enabled') else 'OFF'}"))
             if adv.get('lfo_enabled'):
-                self.layer_list.addItem(QListWidgetItem(f"    LFO: {adv.get('lfo_frequency', 5.0):.1f} Hz @ {adv.get('lfo_depth', 0.3)*100:.0f}%"))
+                self.layer_list.addItem(QListWidgetItem(f"    Freq: {adv.get('lfo_frequency', 5.0):.1f} Hz, Depth: {adv.get('lfo_depth', 0.3)*100:.0f}%"))
+            
+            self.layer_list.addItem(QListWidgetItem(f"  Echo: {'ON' if adv.get('echo_enabled') else 'OFF'}"))
             if adv.get('echo_enabled'):
-                self.layer_list.addItem(QListWidgetItem(f"    Echo: {adv.get('echo_delay', 0.3):.2f}s @ {adv.get('echo_feedback', 0.4)*100:.0f}%"))
-        else:
-            self.layer_list.addItem(QListWidgetItem(f"  Advanced: OFF"))
+                self.layer_list.addItem(QListWidgetItem(f"    Delay: {adv.get('echo_delay', 0.3):.2f} s, Feedback: {adv.get('echo_feedback', 0.4)*100:.0f}%"))
         
         # Select first selectable item by default
         self.layer_list.setCurrentRow(1)  # Skip header
@@ -1240,20 +1405,57 @@ class SoundDesignStudioV2(QMainWindow):
         )
         
         if reply == QMessageBox.StandardButton.Yes:
-            # Create a new blank config and assign it
-            blank_layer = SoundLayer(name=layer.name, blank=True)
-            layer.config = blank_layer.config
+            # Clear the existing config dictionary in place
+            layer.config.clear()
+            
+            # Now add the blank config values
+            layer.config.update({
+                'frequency': 440.0,
+                'wave_type': 'sine',
+                'duration': 0.5,
+                'volume': 0.0,
+                'attack': 0.0,
+                'decay': 0.0,
+                'sustain': 1.0,
+                'release': 0.0,
+                'overlap': 0.0,
+                'harmonics': {
+                    'enabled': False,
+                    'octave_volume': 0.0,
+                    'fifth_volume': 0.0,
+                    'sub_bass_volume': 0.0
+                },
+                'blending': {
+                    'enabled': False,
+                    'blend_ratio': 0.0
+                },
+                'advanced': {
+                    'enabled': False,
+                    'synthesis_type': 'fm',
+                    'fm_mod_ratio': 1.0,
+                    'fm_mod_index': 0.0,
+                    'noise_type': 'white',
+                    'noise_filter_enabled': False,
+                    'noise_filter_type': 'bandpass',
+                    'noise_filter_low': 2000.0,
+                    'noise_filter_high': 8000.0,
+                    'lfo_enabled': False,
+                    'lfo_frequency': 5.0,
+                    'lfo_depth': 0.0,
+                    'echo_enabled': False,
+                    'echo_delay': 0.0,
+                    'echo_feedback': 0.0
+                },
+                'play_type': 'custom'
+            })
+            
+            # Force refresh the layer list
             self.refresh_layer_list()
             self.statusBar().showMessage(f"Cleared '{layer.name}'", 3000)
     
     def remove_current_layer(self):
-        """Remove the currently selected layer."""
-        if len(self.document.layers) <= 1:
-            QMessageBox.warning(
-                self,
-                "Cannot Remove Layer",
-                "A sound must have at least one layer."
-            )
+        """Remove the currently selected layer. Can remove all layers."""
+        if not self.document.layers:
             return
         
         layer_name = self.document.layers[self.current_layer_index].name
@@ -1266,8 +1468,11 @@ class SoundDesignStudioV2(QMainWindow):
         
         if reply == QMessageBox.StandardButton.Yes:
             self.document.remove_layer(self.current_layer_index)
-            if self.current_layer_index >= len(self.document.layers):
+            # Adjust index if needed
+            if self.current_layer_index >= len(self.document.layers) and len(self.document.layers) > 0:
                 self.current_layer_index = len(self.document.layers) - 1
+            elif len(self.document.layers) == 0:
+                self.current_layer_index = 0
             self.refresh_layer_list()
             self.statusBar().showMessage(f"Removed '{layer_name}'", 3000)
     

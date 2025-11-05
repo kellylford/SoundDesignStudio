@@ -1,0 +1,188 @@
+{
+  "frequency": {
+    "title": "Frequency",
+    "description": "The pitch of the sound measured in Hertz (Hz).",
+    "details": [
+      "Range: 20 Hz to 2000 Hz",
+      "Lower values = deeper/bass sounds",
+      "Higher values = higher pitched sounds",
+      "Common reference: A4 = 440 Hz (standard tuning)",
+      "Musical notes: C4=261.6Hz, E4=329.6Hz, G4=392Hz"
+    ],
+    "tips": "Try 440 Hz for a reference tone, or 261.6 Hz for middle C."
+  },
+  "waveform": {
+    "title": "Waveform",
+    "description": "The shape of the sound wave determines its timbre (tone color).",
+    "details": [
+      "Sine: Pure tone, smooth and mellow (flute-like)",
+      "Square: Hollow, clarinet-like sound with odd harmonics",
+      "Sawtooth: Bright, rich sound with all harmonics (strings, brass)",
+      "Triangle: Softer than square, mellow (similar to sine but richer)"
+    ],
+    "tips": "Start with sine for pure tones, sawtooth for richer sounds."
+  },
+  "duration": {
+    "title": "Duration",
+    "description": "How long the sound plays in seconds.",
+    "details": [
+      "Range: 0.1 to 3.0 seconds",
+      "Shorter durations work well for percussion",
+      "Longer durations suit sustained notes",
+      "Combined with envelope for total control"
+    ],
+    "tips": "Use 0.2-0.5s for short hits, 1-2s for sustained tones."
+  },
+  "volume": {
+    "title": "Volume",
+    "description": "The loudness/amplitude of the sound.",
+    "details": [
+      "Range: 0.0 (silent) to 1.0 (maximum)",
+      "Values above 1.0 may cause distortion",
+      "Volume of 0.0 marks the layer as blank/unset",
+      "Combine multiple layers: reduce individual volumes to avoid clipping"
+    ],
+    "tips": "Start at 0.7 for single layers, 0.3-0.5 for multiple layers."
+  },
+  "overlap": {
+    "title": "Overlap",
+    "description": "How much the next layer starts before this one finishes.",
+    "details": [
+      "Range: 0.0 (no overlap) to full duration",
+      "Positive values: next layer starts early (overlap)",
+      "Creates smoother transitions between layers",
+      "Use in sequential playback mode"
+    ],
+    "tips": "Try 0.1-0.3s for smooth transitions, 0.0 for distinct separation."
+  },
+  "attack": {
+    "title": "Attack Time",
+    "description": "How quickly the sound reaches full volume after starting.",
+    "details": [
+      "Range: 0.001 to 1.0 seconds",
+      "Short attack (0.01s): Percussive, sharp start",
+      "Medium attack (0.1s): Natural instrument onset",
+      "Long attack (0.5s+): Slow fade-in, ambient"
+    ],
+    "tips": "Use 0.01s for drums, 0.1s for plucked strings, 0.3s+ for pads."
+  },
+  "decay": {
+    "title": "Decay Time",
+    "description": "How quickly the sound drops from peak to sustain level.",
+    "details": [
+      "Range: 0.001 to 1.0 seconds",
+      "Occurs immediately after attack phase",
+      "Creates natural sound evolution",
+      "Short decay: punchy, staccato sounds",
+      "Long decay: smooth, flowing sounds"
+    ],
+    "tips": "Match to your sustain level for desired character."
+  },
+  "sustain": {
+    "title": "Sustain Level",
+    "description": "The volume level held after decay, before release.",
+    "details": [
+      "Range: 0.0 to 1.0",
+      "Not a time value - it's an amplitude level",
+      "High sustain (0.7-1.0): held notes, organs",
+      "Low sustain (0.1-0.4): percussive, piano-like",
+      "Zero sustain: pure attack-decay envelope"
+    ],
+    "tips": "Use 0.7+ for sustained instruments, 0.1-0.3 for plucked sounds."
+  },
+  "release": {
+    "title": "Release Time",
+    "description": "How long the sound takes to fade to silence after the note ends.",
+    "details": [
+      "Range: 0.01 to 2.0 seconds",
+      "Short release (0.01-0.1s): Abrupt stop",
+      "Medium release (0.2-0.5s): Natural decay",
+      "Long release (1.0s+): Reverberant, ambient tail"
+    ],
+    "tips": "Use 0.5-1.0s for realistic acoustic sounds, 0.1s for electronic hits."
+  },
+  "harmonics": {
+    "title": "Harmonics",
+    "description": "Add additional frequencies to create richer, more complex tones.",
+    "details": [
+      "Octave: Adds a note one octave (double frequency) above",
+      "Fifth: Adds the musical fifth interval above the octave",
+      "Sub-bass: Adds a note one octave below (half frequency)",
+      "Volumes are relative to the main tone",
+      "Creates organ-like, synthesizer-like timbres"
+    ],
+    "tips": "Start with octave at 0.3-0.5 for richness without overwhelming."
+  },
+  "fm_ratio": {
+    "title": "FM Modulator Ratio",
+    "description": "The frequency relationship between carrier and modulator in FM synthesis.",
+    "details": [
+      "Range: 0.5 to 5.0",
+      "Integer ratios (1, 2, 3) create harmonic sounds",
+      "Non-integer ratios create inharmonic, bell-like tones",
+      "Ratio 1.4, Index 5: Classic bell sound",
+      "Ratio 14, Index 3: Electric piano",
+      "Ratio 1, Index 5: Brass instrument"
+    ],
+    "tips": "Experiment! Small changes create dramatically different timbres."
+  },
+  "fm_index": {
+    "title": "FM Modulation Index",
+    "description": "Controls how much the modulator affects the carrier frequency.",
+    "details": [
+      "Range: 0.0 to 10.0",
+      "Low index (0-2): Subtle, gentle modulation",
+      "Medium index (3-5): Rich harmonic content",
+      "High index (6-10): Complex, bright, aggressive tones",
+      "Higher index = more sidebands/harmonics"
+    ],
+    "tips": "Start with 3-5 for musical sounds, go higher for aggressive tones."
+  },
+  "noise_type": {
+    "title": "Noise Type",
+    "description": "The spectral distribution of random noise.",
+    "details": [
+      "White: Equal energy at all frequencies (hiss, cymbals, hi-hats)",
+      "Pink: More energy in lower frequencies (ocean, rain, wind)",
+      "Brown: Even more bass energy (thunder, rumble, explosions)",
+      "Each type has a different 'color' or frequency balance"
+    ],
+    "tips": "White for percussion, pink for nature sounds, brown for low rumble."
+  },
+  "noise_filter": {
+    "title": "Noise Filter",
+    "description": "Shapes noise by allowing only certain frequencies to pass through.",
+    "details": [
+      "Bandpass: Allows frequencies between low and high cutoffs",
+      "Highpass: Allows only frequencies above the low cutoff",
+      "Lowpass: Allows only frequencies below the high cutoff",
+      "Create snare drums, hi-hats, wind effects"
+    ],
+    "tips": "Bandpass 2000-8000 Hz on white noise = hi-hat sound."
+  },
+  "lfo": {
+    "title": "LFO (Low Frequency Oscillator) Tremolo",
+    "description": "Creates rhythmic volume variations for vibrato/tremolo effects.",
+    "details": [
+      "LFO Frequency: How fast the volume oscillates (0.5-10 Hz)",
+      "LFO Depth: How much the volume changes (0-100%)",
+      "Low freq (1-3 Hz): Slow, sweeping tremolo",
+      "High freq (5-8 Hz): Rapid vibrato effect",
+      "Used in guitar amps, synthesizers, organs"
+    ],
+    "tips": "Try 5 Hz at 30% depth for classic tremolo effect."
+  },
+  "echo": {
+    "title": "Echo / Delay",
+    "description": "Creates repeating copies of the sound at regular intervals.",
+    "details": [
+      "Delay Time: Gap between original and echo (0.05-1.0s)",
+      "Feedback: How much each echo repeats (0-90%)",
+      "Short delay (0.05-0.15s): Slapback echo, doubling",
+      "Medium delay (0.2-0.4s): Classic echo effect",
+      "High feedback (60-80%): Multiple repeats",
+      "Low feedback (20-40%): Subtle ambience"
+    ],
+    "tips": "Try 0.3s delay with 40% feedback for a natural echo."
+  }
+}

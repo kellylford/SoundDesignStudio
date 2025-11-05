@@ -11,7 +11,7 @@ block_cipher = None
 
 # Collect all data files
 datas = [
-    ('sound_presets.json', '.'),
+    ('parameter_help.json', '.'),
 ]
 
 # Hidden imports that PyInstaller might miss

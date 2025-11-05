@@ -1,0 +1,23 @@
+# Build directories
+/build
+/dist
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Log files
+sound_design_debug.log
+
+# Virtual environment
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

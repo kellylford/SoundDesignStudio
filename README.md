@@ -1,151 +1,244 @@
 # Sound Design Studio
 
-A professional sound synthesis and design tool for creating custom audio for the Scores application.
+A multi-layer sound synthesis and design tool for creating custom audio effects and musical instruments.
 
-## Files in This Directory
+## Overview
 
-### Main Application
-- **sound_design_studio.py** - Main GUI application for designing sounds
-- **run_studio.bat** - Launcher script (double-click to run)
+Sound Design Studio is a standalone Windows application with a document-based workflow supporting multi-layer sound composition. Create complex, professional-quality sounds by layering multiple synthesized elements.
 
-### Core Modules
-- **advanced_synthesis.py** - Advanced synthesis techniques (FM, noise, filters, LFO, echo, PWM, Karplus-Strong)
-- **sound_export_system.py** - Export/import system for sound configurations
-- **export_dialog.py** - User-friendly export dialog
+📖 **[Full User Guide](USER_GUIDE.md)** - Complete documentation with tutorials and examples
 
-### Dependencies (in parent directory)
-- **enhanced_audio_player.py** - Enhanced audio playback engine
-- **football_audio_mapper.py** - Audio mapping for football plays
+## Key Features
 
-## Features
+## Key Features
+
+### Multi-Layer Composition
+- Create complex sounds by layering multiple synthesized sounds
+- Two playback modes:
+  - **Sequential**: Layers play one after another with optional overlap
+  - **Simultaneous**: Layers play together (mixed)
+- Navigate between layers with **Left/Right arrow keys**
+- Cut, copy, paste, and reorder layers
 
 ### Sound Synthesis
 - **Basic Waveforms**: Sine, square, sawtooth, triangle
 - **ADSR Envelope**: Full attack, decay, sustain, release control
 - **Harmonic Layering**: Octave, fifth, and sub-bass harmonics
-- **Waveform Blending**: Mix multiple waveforms for warmth
+- **Advanced Synthesis**: FM synthesis, noise generation with filtering
+- **Effects**: LFO tremolo, echo/delay
 
-### Advanced Synthesis (Coming Soon)
-- **FM Synthesis**: Create bells, electric pianos, brass sounds
-- **Noise Generation**: White, pink, brown noise for percussion and atmospheres
-- **Filters**: Bandpass, highpass, lowpass filtering
-- **Effects**: LFO tremolo, echo/delay, ring modulation
-- **Physical Modeling**: Karplus-Strong string synthesis
+### Preset Library
+- **Preview Presets**: Browse and audition presets with auto-play navigation
+- 40+ built-in presets organized by category:
+  - Musical Instruments (Piano, Strings, Drums)
+  - Sound Effects (Impacts, Transitions)
+  - UI Sounds (Buttons, Notifications, Alerts)
+  - Game Sounds (Power-ups, Weapons, Ambient)
 
-### Accessibility
-- **Full Keyboard Navigation**: All controls accessible via keyboard
-- **Screen Reader Support**: Proper ARIA labels and announcements
-- **Keyboard Shortcuts**:
-  - Alt+P: Play current sound
-  - Ctrl+S: Save preset
-  - Ctrl+L: Load preset
-  - Ctrl+N: New preset
-  - Ctrl+I: Show info
-  - Delete: Delete preset
-  - 1-9: Quick load presets 1-9
+### Professional Export
+- **Export complete sounds** to standard WAV audio files
+- **Export individual layers** for more control
+- **44.1 kHz, 16-bit** professional quality
+- **Use anywhere**: Games, apps, videos, websites, presentations
+- See **[EXPORT_GUIDE.md](EXPORT_GUIDE.md)** for detailed integration examples
 
-### Presets
-22 built-in presets including:
-- Gentle Bell, Power Bass, Bright Pluck
-- Warm Pad, Laser Zap, Deep Rumble
-- Kick Drum, Snare Hit, Whoosh
-- And many more...
+## Quick Start
 
-### Export System
-- **Sound Library**: Export sounds to a central library for app integration
-- **File Export**: Export individual sounds or collections as JSON
-- **Integration Guides**: Auto-generated documentation for using sounds in the main app
-- **Categories**: Organize sounds by purpose (Football Plays, Baseball Events, UI Feedback, etc.)
+### For End Users
 
-## Usage
+Simply run **SoundDesignStudio.exe** - no installation required!
 
-### Running the Studio
-1. Double-click `run_studio.bat`, or
-2. Run from command line: `python sound_design_studio.py`
+The executable is a complete, standalone application.
 
-### Creating Sounds
-1. Adjust frequency, wave type, duration, volume
-2. Fine-tune ADSR envelope for shape
-3. Enable harmonics for richness
-4. Enable blending for warmth
-5. Press Alt+P to play and hear your creation
+### For Developers
+
+1. **Clone the repository**
+2. **Create a virtual environment**:
+   ```bash
+   python -m venv .venv
+   ```
+
+3. **Activate the virtual environment**:
+   ```bash
+   .venv\Scripts\activate
+   ```
+
+4. **Install dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+5. **Run the application**:
+   ```bash
+   python sound_design_studio.py
+   ```
+
+## Documentation
+
+- **[USER_GUIDE.md](USER_GUIDE.md)** - Complete user guide with tutorials
+- **[EXPORT_GUIDE.md](EXPORT_GUIDE.md)** - Export and integration guide
+- **[PRESET_REFERENCE.md](PRESET_REFERENCE.md)** - Complete preset library reference
+- **[QUICKSTART.md](QUICKSTART.md)** - 5-minute quick start guide
+
+## Basic Usage
+
+### Creating a Sound
+
+1. **Start with a new document** (opens by default as "Untitled Sound")
+2. **Add layers** using the "Add Layer" button or Ctrl+L
+3. **Design each layer**:
+   - Select a layer and press Enter or click "Design"
+   - Configure parameters in the design dialog
+4. **Configure layer parameters**:
+   - **Basic**: Frequency, waveform, duration, volume
+   - **Envelope**: ADSR (Attack, Decay, Sustain, Release)
+   - **Harmonics**: Octave, fifth, sub-bass components
+   - **Advanced**: FM synthesis, noise, effects
+5. **Preview presets**: Press Alt+R → Preview Presets to browse with auto-play
+6. **Play your sound** with Alt+P or the Play button
+7. **Save your document** (Ctrl+S)
+
+For detailed instructions, see the **[USER_GUIDE.md](USER_GUIDE.md)**
+
+### Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| **Alt+P** | Play all layers |
+| **Alt+Shift+P** | Play focused layer only |
+| **Alt+R** | Open Presets menu |
+| **Ctrl+N** | New document |
+| **Ctrl+O** | Open document |
+| **Ctrl+S** | Save document |
+| **Ctrl+Shift+S** | Save As |
+| **Ctrl+E** | Export as WAV |
+| **Ctrl+L** | Add new layer |
+| **Ctrl+D** | Open designer |
+| **Ctrl+X/C/V** | Cut/Copy/Paste layer |
+| **Alt+Left/Right** | Move layer in sequence |
+| **Delete** | Remove selected layer |
+| **Left/Right Arrow** | Navigate between layers |
+| **Up/Down Arrow** | Navigate within layer properties |
+| **Enter** | Edit selected layer |
+
+See **[USER_GUIDE.md](USER_GUIDE.md)** for complete keyboard shortcut reference.
+
+### Navigating Layers
+
+- Use **arrow keys** (Left/Right) to move between layers
+- Press **Enter** to edit the selected layer
+- Press **Delete** to remove a layer (minimum 1 required)
+
+### Playback Modes
+
+**Sequential Mode** (default):
+- Layers play one after another in order
+- Great for creating sound sequences or transitions
+
+**Simultaneous Mode**:
+- All layers play at the same time (mixed)
+- Perfect for building complex timbres and rich sounds
+
+### Saving and Loading
+
+Sound documents are saved in JSON format (`.sds` or `.json`) with all layer configurations preserved.
+
+**File format includes**:
+- Document name and description
+- Playback mode (sequential/simultaneous)
+- All layer names and complete synthesis configurations
 
 ### Exporting Sounds
-1. Create your sound
-2. Click "Export" button (coming soon)
-3. Choose category and add usage notes
-4. Export to library or file
-5. Use in the main Scores application
 
-### Loading Presets
-- Click a preset in the list and press Enter
-- Use quick load shortcuts (1-9 keys)
-- Modify preset parameters to create variations
+Your sounds can be exported as standard WAV audio files for use anywhere!
 
-## Integration with Scores App
+**Export Complete Sound** (Ctrl+E):
+- Exports all layers according to playback mode
+- Sequential: Layers concatenated into one file
+- Simultaneous: Layers mixed together
+- Use in games, apps, videos, websites, etc.
 
-Sounds created in the studio can be exported and used in the main application:
+**Export Individual Layer**:
+- Menu: File → Export Current Layer as WAV
+- Export just the selected layer
+- Useful for component sounds or remixing
 
-```python
-from sound_export_system import SoundLibrary
+**WAV File Specs**:
+- Sample Rate: 44,100 Hz (CD quality)
+- Bit Depth: 16-bit PCM
+- Format: Uncompressed WAV
+- Compatible with: Everything!
 
-# Load your custom sound
-library = SoundLibrary.load_library()
-custom_sound = library['My Custom Sound']
+**See EXPORT_GUIDE.md** for:
+- Integration examples (Python, JavaScript, Unity, etc.)
+- Usage in sports apps, games, web, mobile
+- Converting to MP3/OGG if needed
+- Workflow examples and best practices
+- All layer names and complete synthesis configurations
 
-# Use in the app
-from enhanced_audio_player import EnhancedAudioPlayer
-player = EnhancedAudioPlayer()
-# ... configure and play
-```
+## Building an Executable
 
-See the auto-generated integration guides for detailed instructions.
+To distribute your application as a standalone `.exe` file:
+
+1. **Ensure your virtual environment is activated**
+2. **Run the build script**:
+   ```bash
+   build.bat
+   ```
+3. **Find your executable** in `dist\SoundDesignStudio.exe`
+
+The executable can be distributed to users who don't have Python installed!
+
+### Build Requirements
+
+The build process uses PyInstaller to create a single executable file. All dependencies are included:
+- PyQt6 GUI framework
+- NumPy for audio processing
+- SoundDevice for audio playback
+- SciPy for advanced signal processing
 
 ## Technical Details
 
-### Audio Generation
-- Pure Python synthesis using NumPy
-- Sample rate: 44.1 kHz
-- 16-bit audio output
-- No external audio files required
+### Dependencies
 
-### Platform Support
-- Windows (tested)
-- Linux (should work)
-- macOS (should work)
+- **Python 3.10+**
+- **PyQt6** - Modern GUI framework
+- **NumPy** - Audio processing
+- **SoundDevice** - Audio playback
+- **SciPy** - Signal processing
+- **PyInstaller** - Executable builder (for development)
 
-### Requirements
-- Python 3.8+
-- PyQt6 6.9.1+
-- NumPy 2.1.3+
-- sounddevice (for audio playback)
+See `requirements.txt` for exact versions.
 
-## Development
+### Building from Source
 
-### Adding New Features
-1. Synthesis techniques go in `advanced_synthesis.py`
-2. GUI controls go in `sound_design_studio.py`
-3. Export functionality goes in `sound_export_system.py` or `export_dialog.py`
+To create a standalone executable:
 
-### Testing
-Test audio quality:
-```bash
-python test_audio_quality.py
-```
+1. **Activate your virtual environment**
+2. **Run the build script**:
+   ```bash
+   build.bat
+   ```
+3. **Find the executable** in `dist\SoundDesignStudio.exe`
 
-### Future Enhancements
-- [ ] Integrate advanced synthesis into GUI
-- [ ] Add spectral analyzer visualization
-- [ ] Add waveform display
-- [ ] Add more presets
-- [ ] Add preset categories
-- [ ] Add undo/redo functionality
-- [ ] Add copy/paste parameters
-
-## Support
-
-For questions or issues, refer to the main Scores application documentation.
+The build uses PyInstaller to bundle all dependencies into a single `.exe` file.
 
 ## License
 
-Same as parent Scores application (see LICENSE in parent directory).
+See LICENSE file for details.
+
+## Support
+
+For questions, issues, or feature requests, please open an issue on GitHub.
+
+**Documentation:**
+- [User Guide](USER_GUIDE.md) - Complete usage guide
+- [Export Guide](EXPORT_GUIDE.md) - Integration examples
+- [Preset Reference](PRESET_REFERENCE.md) - All built-in presets
+- [Quick Start](QUICKSTART.md) - Get started in 5 minutes
+
+### v1.0
+- Single-sound preset system
+- Tabbed parameter interface
+- Preset library management
+- Export/import capabilities
