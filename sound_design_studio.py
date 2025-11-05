@@ -49,6 +49,9 @@ class SoundLayer:
     
     def _default_config(self):
         """Create default sound configuration for this layer."""
+        from audio_effects import AudioEffectsProcessor
+        from soundfont_player import SoundFontPlayer
+        
         return {
             'frequency': 440.0,
             'wave_type': 'sine',
@@ -86,11 +89,16 @@ class SoundLayer:
                 'echo_delay': 0.3,
                 'echo_feedback': 0.4
             },
+            'effects': AudioEffectsProcessor().get_default_effects_config(),
+            'soundfont': SoundFontPlayer().get_default_soundfont_config(),
             'play_type': 'custom'
         }
     
     def _blank_config(self):
         """Create blank/minimal sound configuration for a new layer."""
+        from audio_effects import AudioEffectsProcessor
+        from soundfont_player import SoundFontPlayer
+        
         return {
             'frequency': 440.0,
             'wave_type': 'sine',
@@ -128,6 +136,8 @@ class SoundLayer:
                 'echo_delay': 0.0,
                 'echo_feedback': 0.0
             },
+            'effects': AudioEffectsProcessor().get_default_effects_config(),
+            'soundfont': SoundFontPlayer().get_default_soundfont_config(),
             'play_type': 'custom'
         }
     

@@ -11,6 +11,10 @@ from typing import Optional
 from pathlib import Path
 import logging
 
+# Import new modules
+from audio_effects import AudioEffectsProcessor
+from soundfont_player import SoundFontPlayer
+
 # Set up logging (disabled by default to avoid creating debug files)
 # Uncomment the following lines for debugging if needed:
 # logging.basicConfig(
@@ -38,6 +42,8 @@ class PlayAudioConfig:
     harmonics: dict = None
     blending: dict = None
     advanced: dict = None
+    effects: dict = None  # NEW: Audio effects configuration
+    soundfont: dict = None  # NEW: SoundFont configuration
     play_type: str = 'custom'
     
     def __post_init__(self):
@@ -71,6 +77,10 @@ class PlayAudioConfig:
                 'echo_delay': 0.3,
                 'echo_feedback': 0.4
             }
+        if self.effects is None:
+            self.effects = AudioEffectsProcessor().get_default_effects_config()
+        if self.soundfont is None:
+            self.soundfont = SoundFontPlayer().get_default_soundfont_config()
 
 
 class EnhancedAudioPlayer:
@@ -80,6 +90,9 @@ class EnhancedAudioPlayer:
     
     def __init__(self):
         self.sample_rate = self.SAMPLE_RATE
+        self.effects_processor = AudioEffectsProcessor(self.sample_rate)
+        self.soundfont_player = SoundFontPlayer(self.sample_rate)
+
     
     def play_sound(self, config: PlayAudioConfig):
         """Play a sound based on configuration."""
@@ -87,8 +100,11 @@ class EnhancedAudioPlayer:
             # Generate the audio samples
             samples = self._generate_audio(config)
             
-            # Ensure volume is in valid range
+            # Apply volume
             samples = samples * config.volume
+            
+            # Apply audio effects
+            samples = self.effects_processor.apply_effects(samples, config.effects)
             
             # Clip to prevent distortion
             samples = np.clip(samples, -1.0, 1.0)
@@ -105,6 +121,21 @@ class EnhancedAudioPlayer:
         """Play multiple sounds mixed together (simultaneous playback)."""
         try:
             if not configs:
+                return
+            
+            logger.info(f"=== Starting mixed playback with {len(configs)} layers ===")
+            
+            # Generate audio for all configs
+            all_audio = []
+            max_duration = 0
+            
+            for config in configs:
+                audio = self._generate_audio(config)
+                audio = audio * config.volume
+                # Apply effects to each layer individually
+                audio = self.effects_processor.apply_effects(audio, config.effects)
+                all_audio.append(audio)
+                max_duration = max(max_duration, len(audio))
                 return
             
             logger.info(f"=== Starting mixed playback with {len(configs)} layers ===")
@@ -179,6 +210,9 @@ class EnhancedAudioPlayer:
             # Apply volume
             samples = samples * config.volume
             
+            # Apply audio effects
+            samples = self.effects_processor.apply_effects(samples, config.effects)
+            
             # Clip to prevent distortion
             samples = np.clip(samples, -1.0, 1.0)
             
@@ -208,6 +242,8 @@ class EnhancedAudioPlayer:
             for config in configs:
                 audio = self._generate_audio(config)
                 audio = audio * config.volume
+                # Apply effects to each layer individually
+                audio = self.effects_processor.apply_effects(audio, config.effects)
                 all_audio.append(audio)
                 max_duration = max(max_duration, len(audio))
             
@@ -295,6 +331,12 @@ class EnhancedAudioPlayer:
     
     def _generate_audio(self, config: PlayAudioConfig) -> np.ndarray:
         """Generate audio samples based on configuration."""
+        
+        # Check if SoundFont mode is enabled
+        if config.soundfont.get('enabled', False):
+            return self._generate_soundfont_audio(config)
+        
+        # Otherwise use synthesis
         num_samples = int(self.sample_rate * config.duration)
         t = np.linspace(0, config.duration, num_samples, False)
         
@@ -315,6 +357,35 @@ class EnhancedAudioPlayer:
         # Apply advanced synthesis if enabled
         if config.advanced.get('enabled', False):
             audio = self._apply_advanced(audio, t, config)
+        
+        return audio
+    
+    def _generate_soundfont_audio(self, config: PlayAudioConfig) -> np.ndarray:
+        """Generate audio using SoundFont."""
+        soundfont_config = config.soundfont
+        
+        # Load SoundFont if not already loaded or if path changed
+        soundfont_path = soundfont_config.get('soundfont_path', '')
+        if soundfont_path and soundfont_path != self.soundfont_player.current_soundfont_path:
+            self.soundfont_player.load_soundfont(soundfont_path)
+        
+        # Convert frequency to MIDI note if using frequency mode
+        if soundfont_config.get('use_frequency', True):
+            midi_note = self.soundfont_player.frequency_to_midi(config.frequency)
+        else:
+            midi_note = soundfont_config.get('midi_note', 60)
+        
+        # Generate note
+        velocity = soundfont_config.get('velocity', 100)
+        program = soundfont_config.get('program', 0)
+        bank = soundfont_config.get('bank', 0)
+        
+        audio = self.soundfont_player.generate_note(
+            midi_note, velocity, config.duration, program, bank
+        )
+        
+        # Still apply ADSR envelope for additional shaping
+        audio = self._apply_adsr(audio, config)
         
         return audio
     

@@ -10,6 +10,12 @@ sounddevice>=0.4.6
 soundfile>=0.12.1
 scipy>=1.10.0
 
+# Audio Effects (Spotify's professional effects library)
+pedalboard>=0.7.0
+
+# SoundFont Support (realistic instruments)
+pyfluidsynth>=1.3.0
+
 # Build and Distribution
 pyinstaller>=5.13.0
 
