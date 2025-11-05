@@ -260,35 +260,39 @@ def get_preset_library():
                 }
             },
             "Noise & Texture": {
-                "White Noise Burst": {
+                "Cymbal Crash": {
                     "playback_mode": "simultaneous",
                     "layers": [
-                        {"name": "Noise", "config": {"frequency": 440, "wave_type": "sine", "duration": 0.5, "volume": 0.5, "attack": 0.01, "decay": 0.2, "sustain": 0.3, "release": 0.3, "advanced": {"enabled": True, "synthesis_type": "noise", "noise_type": "white", "noise_filter_enabled": True, "noise_filter_type": "bandpass", "noise_filter_low": 2000, "noise_filter_high": 8000}}}
+                        {"name": "Bright Crash", "config": {"frequency": 440, "wave_type": "sine", "duration": 1.5, "volume": 0.6, "attack": 0.001, "decay": 0.6, "sustain": 0.3, "release": 0.9, "advanced": {"enabled": True, "synthesis_type": "noise", "noise_type": "white", "noise_filter_enabled": True, "noise_filter_type": "highpass", "noise_filter_low": 6000, "noise_filter_high": 15000}}},
+                        {"name": "Body", "config": {"frequency": 440, "wave_type": "sine", "duration": 1.5, "volume": 0.3, "attack": 0.001, "decay": 0.5, "sustain": 0.2, "release": 0.8, "advanced": {"enabled": True, "synthesis_type": "noise", "noise_type": "pink", "noise_filter_enabled": True, "noise_filter_type": "bandpass", "noise_filter_low": 2000, "noise_filter_high": 6000}}}
                     ]
                 },
-                "Wind Gust": {
+                "Steam Release": {
                     "playback_mode": "simultaneous",
                     "layers": [
-                        {"name": "Wind", "config": {"frequency": 440, "wave_type": "sine", "duration": 2.0, "volume": 0.4, "attack": 0.3, "decay": 0.5, "sustain": 0.6, "release": 1.2, "advanced": {"enabled": True, "synthesis_type": "noise", "noise_type": "pink", "noise_filter_enabled": True, "noise_filter_type": "lowpass", "noise_filter_low": 500, "noise_filter_high": 2000}}}
+                        {"name": "Hiss", "config": {"frequency": 440, "wave_type": "sine", "duration": 2.0, "volume": 0.5, "attack": 0.05, "decay": 0.8, "sustain": 0.4, "release": 1.2, "advanced": {"enabled": True, "synthesis_type": "noise", "noise_type": "white", "noise_filter_enabled": True, "noise_filter_type": "bandpass", "noise_filter_low": 3000, "noise_filter_high": 10000, "lfo_enabled": True, "lfo_frequency": 8.0, "lfo_depth": 0.3}}},
+                        {"name": "Pressure", "config": {"frequency": 200, "wave_type": "sawtooth", "duration": 1.8, "volume": 0.3, "attack": 0.1, "decay": 0.7, "sustain": 0.3, "release": 1.0}}
                     ]
                 },
-                "Ocean Waves": {
+                "Helicopter": {
                     "playback_mode": "simultaneous",
                     "layers": [
-                        {"name": "Waves", "config": {"frequency": 440, "wave_type": "sine", "duration": 4.0, "volume": 0.5, "attack": 1.0, "decay": 1.0, "sustain": 0.7, "release": 2.0, "advanced": {"enabled": True, "synthesis_type": "noise", "noise_type": "brown", "noise_filter_enabled": True, "noise_filter_type": "lowpass", "noise_filter_low": 300, "noise_filter_high": 1000, "lfo_enabled": True, "lfo_frequency": 0.5, "lfo_depth": 0.3}}}
+                        {"name": "Blades", "config": {"frequency": 60, "wave_type": "square", "duration": 3.0, "volume": 0.5, "attack": 0.2, "decay": 0.5, "sustain": 0.8, "release": 1.0, "advanced": {"enabled": True, "lfo_enabled": True, "lfo_frequency": 12.0, "lfo_depth": 0.7}}},
+                        {"name": "Air", "config": {"frequency": 440, "wave_type": "sine", "duration": 3.0, "volume": 0.4, "attack": 0.3, "decay": 0.5, "sustain": 0.7, "release": 1.0, "advanced": {"enabled": True, "synthesis_type": "noise", "noise_type": "pink", "noise_filter_enabled": True, "noise_filter_type": "bandpass", "noise_filter_low": 1000, "noise_filter_high": 4000}}}
                     ]
                 },
-                "Radio Static": {
+                "Sandstorm": {
                     "playback_mode": "simultaneous",
                     "layers": [
-                        {"name": "Static", "config": {"frequency": 440, "wave_type": "sine", "duration": 1.0, "volume": 0.4, "attack": 0.1, "decay": 0.3, "sustain": 0.6, "release": 0.5, "advanced": {"enabled": True, "synthesis_type": "noise", "noise_type": "white", "noise_filter_enabled": True, "noise_filter_type": "highpass", "noise_filter_low": 4000, "noise_filter_high": 12000}}}
+                        {"name": "Wind", "config": {"frequency": 440, "wave_type": "sine", "duration": 4.0, "volume": 0.5, "attack": 1.0, "decay": 1.0, "sustain": 0.7, "release": 2.0, "advanced": {"enabled": True, "synthesis_type": "noise", "noise_type": "brown", "noise_filter_enabled": True, "noise_filter_type": "lowpass", "noise_filter_low": 400, "noise_filter_high": 1500, "lfo_enabled": True, "lfo_frequency": 0.3, "lfo_depth": 0.5}}},
+                        {"name": "Grit", "config": {"frequency": 440, "wave_type": "sine", "duration": 4.0, "volume": 0.3, "attack": 1.0, "decay": 1.0, "sustain": 0.6, "release": 2.0, "advanced": {"enabled": True, "synthesis_type": "noise", "noise_type": "white", "noise_filter_enabled": True, "noise_filter_type": "bandpass", "noise_filter_low": 2000, "noise_filter_high": 5000, "lfo_enabled": True, "lfo_frequency": 0.7, "lfo_depth": 0.4}}}
                     ]
                 },
-                "Thunder Rumble": {
+                "Waterfall": {
                     "playback_mode": "simultaneous",
                     "layers": [
-                        {"name": "Rumble", "config": {"frequency": 440, "wave_type": "sine", "duration": 3.0, "volume": 0.6, "attack": 0.5, "decay": 1.2, "sustain": 0.5, "release": 1.8, "advanced": {"enabled": True, "synthesis_type": "noise", "noise_type": "brown", "noise_filter_enabled": True, "noise_filter_type": "lowpass", "noise_filter_low": 100, "noise_filter_high": 400}}},
-                        {"name": "Crack", "config": {"frequency": 440, "wave_type": "sine", "duration": 0.5, "volume": 0.4, "attack": 0.01, "decay": 0.2, "sustain": 0.2, "release": 0.3, "advanced": {"enabled": True, "synthesis_type": "noise", "noise_type": "white", "noise_filter_enabled": True, "noise_filter_type": "bandpass", "noise_filter_low": 2000, "noise_filter_high": 6000}}}
+                        {"name": "Rush", "config": {"frequency": 440, "wave_type": "sine", "duration": 3.5, "volume": 0.5, "attack": 0.5, "decay": 1.0, "sustain": 0.8, "release": 1.5, "advanced": {"enabled": True, "synthesis_type": "noise", "noise_type": "pink", "noise_filter_enabled": True, "noise_filter_type": "bandpass", "noise_filter_low": 800, "noise_filter_high": 3000}}},
+                        {"name": "Splash", "config": {"frequency": 440, "wave_type": "sine", "duration": 3.5, "volume": 0.3, "attack": 0.6, "decay": 1.0, "sustain": 0.7, "release": 1.5, "advanced": {"enabled": True, "synthesis_type": "noise", "noise_type": "white", "noise_filter_enabled": True, "noise_filter_type": "highpass", "noise_filter_low": 3000, "noise_filter_high": 8000, "lfo_enabled": True, "lfo_frequency": 1.5, "lfo_depth": 0.2}}}
                     ]
                 }
             },
