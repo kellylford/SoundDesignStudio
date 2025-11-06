@@ -25,3 +25,8 @@ Thumbs.db
 # Exported preset demos (generated files)
 preset_demos/
 test_export/
+/SoundFonts
+
+# User recordings (generated WAV files)
+recordings/
+*.wav

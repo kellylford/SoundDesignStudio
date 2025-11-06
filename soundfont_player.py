@@ -9,10 +9,15 @@ from pathlib import Path
 try:
     import fluidsynth
     FLUIDSYNTH_AVAILABLE = True
-except ImportError:
+except (ImportError, FileNotFoundError, OSError) as e:
     FLUIDSYNTH_AVAILABLE = False
-    print("Warning: pyfluidsynth not installed. SoundFont support will be disabled.")
-    print("Install with: pip install pyfluidsynth")
+    print("Warning: FluidSynth not available. SoundFont support will be disabled.")
+    if isinstance(e, FileNotFoundError):
+        print("  FluidSynth system library not found.")
+        print("  See INSTALLATION_NEW_FEATURES.md for installation instructions.")
+    else:
+        print("  Install with: pip install pyfluidsynth")
+        print("  Plus FluidSynth system library (see INSTALLATION_NEW_FEATURES.md)")
 
 
 class SoundFontPlayer:
@@ -31,11 +36,21 @@ class SoundFontPlayer:
     def _initialize_synth(self):
         """Initialize FluidSynth synthesizer."""
         try:
-            self.synth = fluidsynth.Synth(samplerate=float(self.sample_rate))
-            self.synth.start(driver='file')  # Use file driver for rendering
+            # Create synth with gain set to avoid clipping
+            self.synth = fluidsynth.Synth(gain=0.5, samplerate=float(self.sample_rate))
+            
+            # Start with 'file' driver for offline rendering (no audio device needed)
+            # This avoids SDL/MIDI device warnings
+            try:
+                self.synth.start(driver='file')
+            except:
+                # If 'file' driver fails, try without driver (will use default)
+                self.synth.start()
+                
         except Exception as e:
             print(f"Error initializing FluidSynth: {e}")
             self.enabled = False
+            self.synth = None
     
     def load_soundfont(self, soundfont_path: str) -> bool:
         """
@@ -89,9 +104,16 @@ class SoundFontPlayer:
             Audio samples as numpy array
         """
         if not self.enabled or not self.synth or self.soundfont_id is None:
-            return np.zeros(int(duration * self.sample_rate))
+            print("SoundFont not loaded or not enabled")
+            return np.zeros(int(duration * self.sample_rate), dtype=np.float32)
         
         try:
+            # Validate inputs
+            midi_note = max(0, min(127, int(midi_note)))
+            velocity = max(1, min(127, int(velocity)))
+            duration = max(0.1, duration)
+            program = max(0, min(127, int(program)))
+            
             # Select program (instrument)
             self.synth.program_select(0, self.soundfont_id, bank, program)
             
@@ -101,19 +123,30 @@ class SoundFontPlayer:
             # Play note
             self.synth.noteon(0, midi_note, velocity)
             
-            # Render audio
-            audio = self.synth.get_samples(num_samples)
+            # Render audio with extra samples for release
+            extra_samples = int(0.5 * self.sample_rate)  # 0.5 second extra for note release
+            audio = self.synth.get_samples(num_samples + extra_samples)
             
             # Note off
             self.synth.noteoff(0, midi_note)
             
-            # Convert to numpy array and normalize
+            # Convert to numpy array
             if isinstance(audio, tuple):
                 # Stereo: average the channels
                 left, right = audio
-                audio = (np.array(left) + np.array(right)) / 2.0
+                left_arr = np.array(left, dtype=np.float32)
+                right_arr = np.array(right, dtype=np.float32)
+                audio = (left_arr + right_arr) / 2.0
             else:
-                audio = np.array(audio)
+                audio = np.array(audio, dtype=np.float32)
+            
+            # Trim to requested duration
+            audio = audio[:num_samples]
+            
+            # Safety check for empty or invalid audio
+            if len(audio) == 0:
+                print("Generated audio is empty")
+                return np.zeros(num_samples, dtype=np.float32)
             
             # Normalize to -1.0 to 1.0 range
             max_val = np.max(np.abs(audio))
@@ -124,7 +157,9 @@ class SoundFontPlayer:
             
         except Exception as e:
             print(f"Error generating note: {e}")
-            return np.zeros(int(duration * self.sample_rate))
+            import traceback
+            traceback.print_exc()
+            return np.zeros(int(duration * self.sample_rate), dtype=np.float32)
     
     def frequency_to_midi(self, frequency: float) -> int:
         """Convert frequency (Hz) to MIDI note number."""

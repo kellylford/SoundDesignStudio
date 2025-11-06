@@ -45,6 +45,8 @@ class PlayAudioConfig:
     effects: dict = None  # NEW: Audio effects configuration
     soundfont: dict = None  # NEW: SoundFont configuration
     play_type: str = 'custom'
+    recorded_audio_file: str = None  # NEW: Path to recorded audio file for playback
+    recording_notes: list = None  # NEW: Store recorded notes for reference
     
     def __post_init__(self):
         if self.harmonics is None:
@@ -97,24 +99,46 @@ class EnhancedAudioPlayer:
     def play_sound(self, config: PlayAudioConfig):
         """Play a sound based on configuration."""
         try:
+            print(f"\n=== AudioPlayer.play_sound called ===")
+            print(f"Config type: {type(config)}")
+            print(f"Frequency: {config.frequency} Hz")
+            print(f"Duration: {config.duration} sec")
+            print(f"Volume: {config.volume}")
+            print(f"Wave type: {config.wave_type}")
+            
+            # Check SoundFont settings
+            if hasattr(config, 'soundfont'):
+                print(f"SoundFont enabled: {config.soundfont.get('enabled', False)}")
+                print(f"SoundFont path: {config.soundfont.get('soundfont_path', 'N/A')}")
+            
             # Generate the audio samples
+            print(f"Generating audio samples...")
             samples = self._generate_audio(config)
+            print(f"Generated {len(samples)} samples")
+            print(f"Sample min/max: {samples.min():.4f} / {samples.max():.4f}")
             
             # Apply volume
             samples = samples * config.volume
+            print(f"After volume: min/max: {samples.min():.4f} / {samples.max():.4f}")
             
             # Apply audio effects
             samples = self.effects_processor.apply_effects(samples, config.effects)
+            print(f"After effects: min/max: {samples.min():.4f} / {samples.max():.4f}")
             
             # Clip to prevent distortion
             samples = np.clip(samples, -1.0, 1.0)
             
             # Play the sound
+            print(f"Playing audio...")
             sd.play(samples, self.sample_rate)
+            print(f"Waiting for playback to complete...")
             sd.wait()
+            print(f"Playback complete!")
             
         except Exception as e:
             print(f"Error playing sound: {e}")
+            import traceback
+            traceback.print_exc()
             raise
     
     def play_mixed_sounds(self, configs: list):
@@ -123,34 +147,22 @@ class EnhancedAudioPlayer:
             if not configs:
                 return
             
-            logger.info(f"=== Starting mixed playback with {len(configs)} layers ===")
+            print(f"\n=== play_mixed_sounds called with {len(configs)} layers ===")
             
             # Generate audio for all configs
             all_audio = []
             max_duration = 0
             
-            for config in configs:
+            for i, config in enumerate(configs):
+                print(f"Generating audio for layer {i+1}/{len(configs)}")
                 audio = self._generate_audio(config)
                 audio = audio * config.volume
                 # Apply effects to each layer individually
                 audio = self.effects_processor.apply_effects(audio, config.effects)
                 all_audio.append(audio)
                 max_duration = max(max_duration, len(audio))
-                return
             
-            logger.info(f"=== Starting mixed playback with {len(configs)} layers ===")
-            
-            # Generate audio for all configs
-            all_audio = []
-            max_duration = 0
-            
-            for config in configs:
-                audio = self._generate_audio(config)
-                audio = audio * config.volume
-                all_audio.append(audio)
-                max_duration = max(max_duration, len(audio))
-            
-            logger.info(f"Generated {len(all_audio)} audio arrays, max_duration = {max_duration} samples")
+            print(f"Generated {len(all_audio)} audio arrays, max_duration = {max_duration} samples")
             
             # Pad all audio to same length and store in new list
             padded_audio = []
@@ -332,11 +344,63 @@ class EnhancedAudioPlayer:
     def _generate_audio(self, config: PlayAudioConfig) -> np.ndarray:
         """Generate audio samples based on configuration."""
         
-        # Check if SoundFont mode is enabled
+        print(f"\n=== _generate_audio called ===")
+        
+        # Check if this is a recorded sequence (pre-rendered audio file)
+        if config.play_type == 'recorded_sequence' and hasattr(config, 'recorded_audio_file'):
+            print(f"Loading recorded sequence from: {config.recorded_audio_file}")
+            try:
+                import soundfile as sf
+                audio, _ = sf.read(config.recorded_audio_file)
+                print(f"Loaded recorded audio: {len(audio)} samples")
+                return audio
+            except Exception as e:
+                print(f"Error loading recorded audio: {e}")
+                # Fall through to normal generation
+        
+        # Check if SoundFont mode is enabled AND a soundfont file is loaded
         if config.soundfont.get('enabled', False):
-            return self._generate_soundfont_audio(config)
+            print(f"SoundFont is enabled")
+            soundfont_path = config.soundfont.get('soundfont_path', '')
+            print(f"SoundFont path: '{soundfont_path}'")
+            
+            if not soundfont_path or soundfont_path == "No SoundFont loaded":
+                print("Warning: SoundFont enabled but no file loaded. Using synthesis instead.")
+                # Fall through to synthesis
+            else:
+                print(f"Calling _generate_soundfont_audio...")
+                return self._generate_soundfont_audio(config)
+        else:
+            print(f"SoundFont is NOT enabled, using synthesis")
         
         # Otherwise use synthesis
+        print(f"Using synthesis mode")
+        num_samples = int(self.sample_rate * config.duration)
+        t = np.linspace(0, config.duration, num_samples, False)
+        
+        # Generate base waveform
+        audio = self._generate_waveform(t, config.frequency, config.wave_type)
+        
+        # Apply harmonics if enabled
+        if config.harmonics.get('enabled', False):
+            audio = self._apply_harmonics(audio, t, config)
+        
+        # Apply blending if enabled
+        if config.blending.get('enabled', False) and config.wave_type != 'sine':
+            audio = self._apply_blending(audio, t, config)
+        
+        # Apply ADSR envelope
+        audio = self._apply_adsr(audio, config)
+        
+        # Apply advanced synthesis if enabled
+        if config.advanced.get('enabled', False):
+            audio = self._apply_advanced(audio, t, config)
+        
+        return audio
+    
+    def _generate_audio_synthesis(self, config: PlayAudioConfig) -> np.ndarray:
+        """Generate audio using synthesis (no SoundFont)."""
+        print(f"_generate_audio_synthesis: Generating synthesis audio")
         num_samples = int(self.sample_rate * config.duration)
         t = np.linspace(0, config.duration, num_samples, False)
         
@@ -362,32 +426,77 @@ class EnhancedAudioPlayer:
     
     def _generate_soundfont_audio(self, config: PlayAudioConfig) -> np.ndarray:
         """Generate audio using SoundFont."""
-        soundfont_config = config.soundfont
-        
-        # Load SoundFont if not already loaded or if path changed
-        soundfont_path = soundfont_config.get('soundfont_path', '')
-        if soundfont_path and soundfont_path != self.soundfont_player.current_soundfont_path:
-            self.soundfont_player.load_soundfont(soundfont_path)
-        
-        # Convert frequency to MIDI note if using frequency mode
-        if soundfont_config.get('use_frequency', True):
-            midi_note = self.soundfont_player.frequency_to_midi(config.frequency)
-        else:
-            midi_note = soundfont_config.get('midi_note', 60)
-        
-        # Generate note
-        velocity = soundfont_config.get('velocity', 100)
-        program = soundfont_config.get('program', 0)
-        bank = soundfont_config.get('bank', 0)
-        
-        audio = self.soundfont_player.generate_note(
-            midi_note, velocity, config.duration, program, bank
-        )
-        
-        # Still apply ADSR envelope for additional shaping
-        audio = self._apply_adsr(audio, config)
-        
-        return audio
+        try:
+            print(f"\n=== _generate_soundfont_audio called ===")
+            soundfont_config = config.soundfont
+            
+            # Validate soundfont player is available
+            if not self.soundfont_player or not self.soundfont_player.enabled:
+                print("SoundFont player not available, falling back to synthesis")
+                return self._generate_audio_synthesis(config)
+            
+            print(f"SoundFont player is available and enabled")
+            
+            # Load SoundFont if not already loaded or if path changed
+            soundfont_path = soundfont_config.get('soundfont_path', '')
+            if not soundfont_path:
+                print("No SoundFont path specified, falling back to synthesis")
+                return self._generate_audio_synthesis(config)
+            
+            print(f"SoundFont path: {soundfont_path}")
+            print(f"Current loaded: {self.soundfont_player.current_soundfont_path}")
+                
+            if soundfont_path != self.soundfont_player.current_soundfont_path:
+                print(f"Loading SoundFont: {soundfont_path}")
+                success = self.soundfont_player.load_soundfont(soundfont_path)
+                if not success:
+                    print(f"Failed to load SoundFont: {soundfont_path}, falling back to synthesis")
+                    return self._generate_audio_synthesis(config)
+                print(f"SoundFont loaded successfully")
+            else:
+                print(f"SoundFont already loaded")
+            
+            # Convert frequency to MIDI note if using frequency mode
+            if soundfont_config.get('use_frequency', True):
+                midi_note = self.soundfont_player.frequency_to_midi(config.frequency)
+                print(f"Converted freq {config.frequency} Hz to MIDI note {midi_note}")
+            else:
+                midi_note = soundfont_config.get('midi_note', 60)
+                print(f"Using MIDI note {midi_note} directly")
+            
+            # Generate note
+            velocity = soundfont_config.get('velocity', 100)
+            program = soundfont_config.get('program', 0)
+            bank = soundfont_config.get('bank', 0)
+            
+            print(f"Generating note: MIDI={midi_note}, velocity={velocity}, duration={config.duration}, program={program}, bank={bank}")
+            
+            audio = self.soundfont_player.generate_note(
+                midi_note, velocity, config.duration, program, bank
+            )
+            
+            print(f"Generated audio: length={len(audio)}, min={audio.min():.4f}, max={audio.max():.4f}")
+            
+            # Check if we got valid audio
+            if audio is None or len(audio) == 0 or np.all(audio == 0):
+                print("SoundFont generated empty audio, falling back to synthesis")
+                return self._generate_audio_synthesis(config)
+            
+            print(f"Audio is valid, applying ADSR...")
+            
+            # Still apply ADSR envelope for additional shaping
+            audio = self._apply_adsr(audio, config)
+            
+            print(f"After ADSR: min={audio.min():.4f}, max={audio.max():.4f}")
+            
+            return audio
+            
+        except Exception as e:
+            print(f"Error in SoundFont generation: {e}")
+            import traceback
+            traceback.print_exc()
+            print("Falling back to synthesis")
+            return self._generate_audio_synthesis(config)
     
     def _generate_waveform(self, t: np.ndarray, frequency: float, wave_type: str) -> np.ndarray:
         """Generate basic waveform."""

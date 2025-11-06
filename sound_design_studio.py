@@ -26,7 +26,7 @@ from PyQt6.QtWidgets import (
     QLabel, QSlider, QComboBox, QPushButton, QGroupBox, QTextEdit,
     QCheckBox, QSpinBox, QDoubleSpinBox, QListWidget, QListWidgetItem,
     QMessageBox, QFileDialog, QTabWidget, QGridLayout, QLineEdit, QDialog,
-    QMenuBar, QMenu, QSplitter
+    QMenuBar, QMenu, QSplitter, QScrollArea
 )
 from PyQt6.QtCore import Qt, pyqtSignal, QSize
 from PyQt6.QtGui import QKeySequence, QShortcut, QAction, QIcon
@@ -38,6 +38,7 @@ from typing import List, Dict, Any
 # Import local audio player (no external dependencies needed)
 from simple_audio_player import EnhancedAudioPlayer, PlayAudioConfig
 from preset_library import get_preset_library
+from keyboard_recorder import KeyboardRecorderDialog
 
 
 class SoundLayer:
@@ -485,6 +486,8 @@ class DesignDialog(QDialog):
         self.build_fm_tab(tabs)
         self.build_noise_tab(tabs)
         self.build_effects_tab(tabs)
+        self.build_audio_effects_tab(tabs)  # NEW: Professional audio effects
+        self.build_soundfont_tab(tabs)      # NEW: SoundFont instruments
         
         layout.addWidget(tabs)
         
@@ -805,6 +808,574 @@ class DesignDialog(QDialog):
         layout.addStretch()
         tabs.addTab(effects_tab, "Effects")
     
+    def build_audio_effects_tab(self, tabs):
+        """Build professional audio effects tab (Pedalboard)."""
+        from audio_effects import PEDALBOARD_AVAILABLE
+        
+        effects_tab = QWidget()
+        layout = QVBoxLayout(effects_tab)
+        
+        # Check if available
+        if not PEDALBOARD_AVAILABLE:
+            warning = QLabel("⚠️ Professional audio effects require 'pedalboard' library.\n\n"
+                           "Install with: pip install pedalboard\n\n"
+                           "These effects provide studio-quality reverb, delay, distortion, and more.")
+            warning.setWordWrap(True)
+            warning.setStyleSheet("color: #cc6600; padding: 20px;")
+            layout.addWidget(warning)
+            layout.addStretch()
+            tabs.addTab(effects_tab, "🎛️ Audio FX")
+            return
+        
+        info_label = QLabel("Professional studio-quality audio effects powered by Spotify's Pedalboard.")
+        info_label.setWordWrap(True)
+        info_label.setStyleSheet("color: #666; font-style: italic; margin-bottom: 10px;")
+        layout.addWidget(info_label)
+        
+        # Create scroll area for all effects
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll_widget = QWidget()
+        scroll_layout = QVBoxLayout(scroll_widget)
+        
+        # Master enable
+        self.audio_effects_enabled = QCheckBox("Enable Audio Effects")
+        self.audio_effects_enabled.setStyleSheet("font-weight: bold;")
+        scroll_layout.addWidget(self.audio_effects_enabled)
+        
+        # Reverb
+        reverb_group = QGroupBox("Reverb")
+        reverb_layout = QVBoxLayout()
+        
+        self.reverb_enabled = QCheckBox("Enable Reverb")
+        reverb_layout.addWidget(self.reverb_enabled)
+        
+        reverb_layout.addWidget(QLabel("Room Size:"))
+        self.reverb_room_spin = QDoubleSpinBox()
+        self.reverb_room_spin.setRange(0.0, 1.0)
+        self.reverb_room_spin.setValue(0.5)
+        self.reverb_room_spin.setSingleStep(0.1)
+        reverb_layout.addWidget(self.reverb_room_spin)
+        
+        reverb_layout.addWidget(QLabel("Damping:"))
+        self.reverb_damping_spin = QDoubleSpinBox()
+        self.reverb_damping_spin.setRange(0.0, 1.0)
+        self.reverb_damping_spin.setValue(0.5)
+        self.reverb_damping_spin.setSingleStep(0.1)
+        reverb_layout.addWidget(self.reverb_damping_spin)
+        
+        reverb_layout.addWidget(QLabel("Wet Level:"))
+        self.reverb_wet_spin = QDoubleSpinBox()
+        self.reverb_wet_spin.setRange(0.0, 1.0)
+        self.reverb_wet_spin.setValue(0.3)
+        self.reverb_wet_spin.setSingleStep(0.1)
+        reverb_layout.addWidget(self.reverb_wet_spin)
+        
+        reverb_group.setLayout(reverb_layout)
+        scroll_layout.addWidget(reverb_group)
+        
+        # Delay
+        delay_group = QGroupBox("Delay")
+        delay_layout = QVBoxLayout()
+        
+        self.delay_enabled = QCheckBox("Enable Delay")
+        delay_layout.addWidget(self.delay_enabled)
+        
+        delay_layout.addWidget(QLabel("Delay Time (sec):"))
+        self.delay_time_spin = QDoubleSpinBox()
+        self.delay_time_spin.setRange(0.01, 2.0)
+        self.delay_time_spin.setValue(0.5)
+        self.delay_time_spin.setSingleStep(0.05)
+        self.delay_time_spin.setSuffix(" sec")
+        delay_layout.addWidget(self.delay_time_spin)
+        
+        delay_layout.addWidget(QLabel("Feedback:"))
+        self.delay_feedback_spin = QDoubleSpinBox()
+        self.delay_feedback_spin.setRange(0.0, 0.95)
+        self.delay_feedback_spin.setValue(0.5)
+        self.delay_feedback_spin.setSingleStep(0.05)
+        delay_layout.addWidget(self.delay_feedback_spin)
+        
+        delay_layout.addWidget(QLabel("Mix:"))
+        self.delay_mix_spin = QDoubleSpinBox()
+        self.delay_mix_spin.setRange(0.0, 1.0)
+        self.delay_mix_spin.setValue(0.5)
+        self.delay_mix_spin.setSingleStep(0.1)
+        delay_layout.addWidget(self.delay_mix_spin)
+        
+        delay_group.setLayout(delay_layout)
+        scroll_layout.addWidget(delay_group)
+        
+        # Distortion
+        distortion_group = QGroupBox("Distortion")
+        distortion_layout = QVBoxLayout()
+        
+        self.distortion_enabled = QCheckBox("Enable Distortion")
+        distortion_layout.addWidget(self.distortion_enabled)
+        
+        distortion_layout.addWidget(QLabel("Drive (dB):"))
+        self.distortion_drive_spin = QDoubleSpinBox()
+        self.distortion_drive_spin.setRange(0.0, 50.0)
+        self.distortion_drive_spin.setValue(10.0)
+        self.distortion_drive_spin.setSingleStep(1.0)
+        self.distortion_drive_spin.setSuffix(" dB")
+        distortion_layout.addWidget(self.distortion_drive_spin)
+        
+        distortion_group.setLayout(distortion_layout)
+        scroll_layout.addWidget(distortion_group)
+        
+        # Chorus
+        chorus_group = QGroupBox("Chorus")
+        chorus_layout = QVBoxLayout()
+        
+        self.chorus_enabled = QCheckBox("Enable Chorus")
+        chorus_layout.addWidget(self.chorus_enabled)
+        
+        chorus_layout.addWidget(QLabel("Rate (Hz):"))
+        self.chorus_rate_spin = QDoubleSpinBox()
+        self.chorus_rate_spin.setRange(0.1, 10.0)
+        self.chorus_rate_spin.setValue(1.0)
+        self.chorus_rate_spin.setSingleStep(0.1)
+        self.chorus_rate_spin.setSuffix(" Hz")
+        chorus_layout.addWidget(self.chorus_rate_spin)
+        
+        chorus_layout.addWidget(QLabel("Depth:"))
+        self.chorus_depth_spin = QDoubleSpinBox()
+        self.chorus_depth_spin.setRange(0.0, 1.0)
+        self.chorus_depth_spin.setValue(0.25)
+        self.chorus_depth_spin.setSingleStep(0.05)
+        chorus_layout.addWidget(self.chorus_depth_spin)
+        
+        chorus_layout.addWidget(QLabel("Mix:"))
+        self.chorus_mix_spin = QDoubleSpinBox()
+        self.chorus_mix_spin.setRange(0.0, 1.0)
+        self.chorus_mix_spin.setValue(0.5)
+        self.chorus_mix_spin.setSingleStep(0.1)
+        chorus_layout.addWidget(self.chorus_mix_spin)
+        
+        chorus_group.setLayout(chorus_layout)
+        scroll_layout.addWidget(chorus_group)
+        
+        # Compressor
+        compressor_group = QGroupBox("Compressor")
+        compressor_layout = QVBoxLayout()
+        
+        self.compressor_enabled = QCheckBox("Enable Compressor")
+        compressor_layout.addWidget(self.compressor_enabled)
+        
+        compressor_layout.addWidget(QLabel("Threshold (dB):"))
+        self.compressor_threshold_spin = QDoubleSpinBox()
+        self.compressor_threshold_spin.setRange(-60.0, 0.0)
+        self.compressor_threshold_spin.setValue(-20.0)
+        self.compressor_threshold_spin.setSingleStep(1.0)
+        self.compressor_threshold_spin.setSuffix(" dB")
+        compressor_layout.addWidget(self.compressor_threshold_spin)
+        
+        compressor_layout.addWidget(QLabel("Ratio:"))
+        self.compressor_ratio_spin = QDoubleSpinBox()
+        self.compressor_ratio_spin.setRange(1.0, 20.0)
+        self.compressor_ratio_spin.setValue(4.0)
+        self.compressor_ratio_spin.setSingleStep(0.5)
+        compressor_layout.addWidget(self.compressor_ratio_spin)
+        
+        compressor_group.setLayout(compressor_layout)
+        scroll_layout.addWidget(compressor_group)
+        
+        scroll_layout.addStretch()
+        scroll.setWidget(scroll_widget)
+        layout.addWidget(scroll)
+        
+        tabs.addTab(effects_tab, "🎛️ Audio FX")
+    
+    def build_soundfont_tab(self, tabs):
+        """Build SoundFont instruments tab."""
+        from soundfont_player import FLUIDSYNTH_AVAILABLE
+        from PyQt6.QtWidgets import QFileDialog, QPushButton
+        
+        soundfont_tab = QWidget()
+        layout = QVBoxLayout(soundfont_tab)
+        
+        # Check if available
+        if not FLUIDSYNTH_AVAILABLE:
+            warning = QLabel("⚠️ SoundFont support requires 'pyfluidsynth' and FluidSynth.\n\n"
+                           "Install with: pip install pyfluidsynth\n"
+                           "Plus system FluidSynth library (see INSTALLATION_NEW_FEATURES.md)\n\n"
+                           "SoundFonts provide realistic piano, strings, brass, drums, and more.")
+            warning.setWordWrap(True)
+            warning.setStyleSheet("color: #cc6600; padding: 20px;")
+            layout.addWidget(warning)
+            layout.addStretch()
+            tabs.addTab(soundfont_tab, "🎹 SoundFont")
+            return
+        
+        info_label = QLabel("Use realistic instrument sounds from SoundFont (.sf2) files instead of synthesis.")
+        info_label.setWordWrap(True)
+        info_label.setStyleSheet("color: #666; font-style: italic; margin-bottom: 10px;")
+        layout.addWidget(info_label)
+        
+        # Master enable
+        self.soundfont_enabled = QCheckBox("Use SoundFont Instead of Synthesis")
+        self.soundfont_enabled.setStyleSheet("font-weight: bold;")
+        layout.addWidget(self.soundfont_enabled)
+        
+        # SoundFont file selection
+        sf_file_group = QGroupBox("SoundFont File")
+        sf_file_layout = QVBoxLayout()
+        
+        file_layout = QHBoxLayout()
+        self.soundfont_path_label = QLabel("No SoundFont loaded")
+        self.soundfont_path_label.setStyleSheet("color: #999; font-style: italic;")
+        file_layout.addWidget(self.soundfont_path_label)
+        
+        browse_btn = QPushButton("Browse...")
+        browse_btn.clicked.connect(self.browse_soundfont)
+        file_layout.addWidget(browse_btn)
+        
+        sf_file_layout.addLayout(file_layout)
+        
+        tip = QLabel("💡 Tip: Download free SoundFonts from:\n• schristiancollins.com/generaluser.php (35MB)\n• musescore.org/en/handbook/soundfonts")
+        tip.setWordWrap(True)
+        tip.setStyleSheet("color: #666; font-size: 9pt; margin-top: 5px;")
+        sf_file_layout.addWidget(tip)
+        
+        sf_file_group.setLayout(sf_file_layout)
+        layout.addWidget(sf_file_group)
+        
+        # Instrument selection
+        instrument_group = QGroupBox("Instrument")
+        instrument_layout = QVBoxLayout()
+        
+        instrument_layout.addWidget(QLabel("Select Instrument:"))
+        self.soundfont_program_combo = QComboBox()
+        self.soundfont_program_combo.setMaxVisibleItems(15)
+        
+        # Add all 128 General MIDI instruments with names
+        gm_instruments = [
+            "0 - Acoustic Grand Piano",
+            "1 - Bright Acoustic Piano",
+            "2 - Electric Grand Piano",
+            "3 - Honky-tonk Piano",
+            "4 - Electric Piano 1",
+            "5 - Electric Piano 2",
+            "6 - Harpsichord",
+            "7 - Clavinet",
+            "8 - Celesta",
+            "9 - Glockenspiel",
+            "10 - Music Box",
+            "11 - Vibraphone",
+            "12 - Marimba",
+            "13 - Xylophone",
+            "14 - Tubular Bells",
+            "15 - Dulcimer",
+            "16 - Drawbar Organ",
+            "17 - Percussive Organ",
+            "18 - Rock Organ",
+            "19 - Church Organ",
+            "20 - Reed Organ",
+            "21 - Accordion",
+            "22 - Harmonica",
+            "23 - Tango Accordion",
+            "24 - Acoustic Guitar (nylon)",
+            "25 - Acoustic Guitar (steel)",
+            "26 - Electric Guitar (jazz)",
+            "27 - Electric Guitar (clean)",
+            "28 - Electric Guitar (muted)",
+            "29 - Overdriven Guitar",
+            "30 - Distortion Guitar",
+            "31 - Guitar Harmonics",
+            "32 - Acoustic Bass",
+            "33 - Electric Bass (finger)",
+            "34 - Electric Bass (pick)",
+            "35 - Fretless Bass",
+            "36 - Slap Bass 1",
+            "37 - Slap Bass 2",
+            "38 - Synth Bass 1",
+            "39 - Synth Bass 2",
+            "40 - Violin",
+            "41 - Viola",
+            "42 - Cello",
+            "43 - Contrabass",
+            "44 - Tremolo Strings",
+            "45 - Pizzicato Strings",
+            "46 - Orchestral Harp",
+            "47 - Timpani",
+            "48 - String Ensemble 1",
+            "49 - String Ensemble 2",
+            "50 - Synth Strings 1",
+            "51 - Synth Strings 2",
+            "52 - Choir Aahs",
+            "53 - Voice Oohs",
+            "54 - Synth Voice",
+            "55 - Orchestra Hit",
+            "56 - Trumpet",
+            "57 - Trombone",
+            "58 - Tuba",
+            "59 - Muted Trumpet",
+            "60 - French Horn",
+            "61 - Brass Section",
+            "62 - Synth Brass 1",
+            "63 - Synth Brass 2",
+            "64 - Soprano Sax",
+            "65 - Alto Sax",
+            "66 - Tenor Sax",
+            "67 - Baritone Sax",
+            "68 - Oboe",
+            "69 - English Horn",
+            "70 - Bassoon",
+            "71 - Clarinet",
+            "72 - Piccolo",
+            "73 - Flute",
+            "74 - Recorder",
+            "75 - Pan Flute",
+            "76 - Blown Bottle",
+            "77 - Shakuhachi",
+            "78 - Whistle",
+            "79 - Ocarina",
+            "80 - Lead 1 (square)",
+            "81 - Lead 2 (sawtooth)",
+            "82 - Lead 3 (calliope)",
+            "83 - Lead 4 (chiff)",
+            "84 - Lead 5 (charang)",
+            "85 - Lead 6 (voice)",
+            "86 - Lead 7 (fifths)",
+            "87 - Lead 8 (bass + lead)",
+            "88 - Pad 1 (new age)",
+            "89 - Pad 2 (warm)",
+            "90 - Pad 3 (polysynth)",
+            "91 - Pad 4 (choir)",
+            "92 - Pad 5 (bowed)",
+            "93 - Pad 6 (metallic)",
+            "94 - Pad 7 (halo)",
+            "95 - Pad 8 (sweep)",
+            "96 - FX 1 (rain)",
+            "97 - FX 2 (soundtrack)",
+            "98 - FX 3 (crystal)",
+            "99 - FX 4 (atmosphere)",
+            "100 - FX 5 (brightness)",
+            "101 - FX 6 (goblins)",
+            "102 - FX 7 (echoes)",
+            "103 - FX 8 (sci-fi)",
+            "104 - Sitar",
+            "105 - Banjo",
+            "106 - Shamisen",
+            "107 - Koto",
+            "108 - Kalimba",
+            "109 - Bagpipe",
+            "110 - Fiddle",
+            "111 - Shanai",
+            "112 - Tinkle Bell",
+            "113 - Agogo",
+            "114 - Steel Drums",
+            "115 - Woodblock",
+            "116 - Taiko Drum",
+            "117 - Melodic Tom",
+            "118 - Synth Drum",
+            "119 - Reverse Cymbal",
+            "120 - Guitar Fret Noise",
+            "121 - Breath Noise",
+            "122 - Seashore",
+            "123 - Bird Tweet",
+            "124 - Telephone Ring",
+            "125 - Helicopter",
+            "126 - Applause",
+            "127 - Gunshot"
+        ]
+        
+        self.soundfont_program_combo.addItems(gm_instruments)
+        self.soundfont_program_combo.setCurrentIndex(0)  # Default to Piano
+        instrument_layout.addWidget(self.soundfont_program_combo)
+        
+        instrument_layout.addWidget(QLabel("Velocity (Loudness):"))
+        self.soundfont_velocity_spin = QSpinBox()
+        self.soundfont_velocity_spin.setRange(1, 127)
+        self.soundfont_velocity_spin.setValue(100)
+        instrument_layout.addWidget(self.soundfont_velocity_spin)
+        
+        instrument_group.setLayout(instrument_layout)
+        layout.addWidget(instrument_group)
+        
+        # Note Selection
+        note_group = QGroupBox("Note to Play")
+        note_layout = QVBoxLayout()
+        
+        note_layout.addWidget(QLabel("Select Note:"))
+        self.soundfont_note_combo = QComboBox()
+        self.soundfont_note_combo.setMaxVisibleItems(15)
+        
+        # Add common notes with frequencies
+        notes = [
+            ("C2 - 65.41 Hz (Low C)", 65.41),
+            ("C3 - 130.81 Hz", 130.81),
+            ("C4 - 261.63 Hz (Middle C)", 261.63),
+            ("D4 - 293.66 Hz", 293.66),
+            ("E4 - 329.63 Hz", 329.63),
+            ("F4 - 349.23 Hz", 349.23),
+            ("G4 - 392.00 Hz", 392.00),
+            ("A4 - 440.00 Hz (Concert A)", 440.00),
+            ("B4 - 493.88 Hz", 493.88),
+            ("C5 - 523.25 Hz", 523.25),
+            ("D5 - 587.33 Hz", 587.33),
+            ("E5 - 659.25 Hz", 659.25),
+            ("F5 - 698.46 Hz", 698.46),
+            ("G5 - 783.99 Hz", 783.99),
+            ("A5 - 880.00 Hz", 880.00),
+            ("C6 - 1046.50 Hz (High C)", 1046.50),
+        ]
+        
+        for note_name, freq in notes:
+            self.soundfont_note_combo.addItem(note_name, freq)
+        
+        # Default to Middle C
+        self.soundfont_note_combo.setCurrentIndex(2)
+        note_layout.addWidget(self.soundfont_note_combo)
+        
+        # Connect to update frequency automatically (only if freq_spin exists)
+        try:
+            self.soundfont_note_combo.currentIndexChanged.connect(self.on_soundfont_note_changed)
+        except:
+            pass  # freq_spin might not exist yet
+        
+        note_layout.addWidget(QLabel("Duration (seconds):"))
+        self.soundfont_duration_spin = QDoubleSpinBox()
+        self.soundfont_duration_spin.setRange(0.1, 10.0)
+        self.soundfont_duration_spin.setValue(1.0)
+        self.soundfont_duration_spin.setSingleStep(0.1)
+        self.soundfont_duration_spin.setSuffix(" sec")
+        note_layout.addWidget(self.soundfont_duration_spin)
+        
+        note_group.setLayout(note_layout)
+        layout.addWidget(note_group)
+        
+        # Play button right in the SoundFont tab
+        play_btn = QPushButton("▶ Play SoundFont")
+        play_btn.setStyleSheet("font-weight: bold; font-size: 12pt; padding: 10px; background: #4CAF50; color: white;")
+        play_btn.clicked.connect(self.play_soundfont_preview)
+        layout.addWidget(play_btn)
+        
+        layout.addStretch()
+        tabs.addTab(soundfont_tab, "🎹 SoundFont")
+    
+    def browse_soundfont(self):
+        """Open file dialog to select SoundFont file."""
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select SoundFont File",
+            "",
+            "SoundFont Files (*.sf2);;All Files (*.*)"
+        )
+        if file_path:
+            self.soundfont_path_label.setText(file_path)
+            self.soundfont_path_label.setStyleSheet("color: #000;")
+    
+    def on_soundfont_note_changed(self):
+        """Update frequency when note selection changes."""
+        if hasattr(self, 'soundfont_note_combo') and hasattr(self, 'freq_spin'):
+            # Get frequency from combo box data
+            freq = self.soundfont_note_combo.currentData()
+            if freq:
+                # Update the frequency in Basic tab
+                self.freq_spin.setValue(freq)
+    
+    def play_soundfont_preview(self):
+        """Play SoundFont with current settings directly."""
+        try:
+            # Check if SoundFont is enabled
+            if not self.soundfont_enabled.isChecked():
+                QMessageBox.warning(
+                    self,
+                    "SoundFont Not Enabled",
+                    "Please check 'Use SoundFont Instead of Synthesis' first."
+                )
+                return
+            
+            # Check if file is loaded
+            sf_path = self.soundfont_path_label.text()
+            if sf_path == "No SoundFont loaded" or not sf_path:
+                QMessageBox.warning(
+                    self,
+                    "No SoundFont File",
+                    "Please click 'Browse...' and select a .sf2 file first."
+                )
+                return
+            
+            # Get settings from SoundFont tab
+            freq = self.soundfont_note_combo.currentData()
+            duration = self.soundfont_duration_spin.value()
+            program = self.soundfont_program_combo.currentIndex()
+            velocity = self.soundfont_velocity_spin.value()
+            
+            print(f"Playing SoundFont: {sf_path}")
+            print(f"  Program: {program}, Note freq: {freq}, Velocity: {velocity}, Duration: {duration}")
+            
+            # Get current config or create default
+            if not hasattr(self.layer, 'config') or not self.layer.config:
+                self.layer.config = self.parent_studio._default_config()
+            
+            # Update config with SoundFont settings
+            self.layer.config['frequency'] = freq
+            self.layer.config['duration'] = duration
+            # Make sure volume is set to a reasonable level
+            if 'volume' not in self.layer.config or self.layer.config['volume'] <= 0:
+                self.layer.config['volume'] = 0.7
+            print(f"  Volume: {self.layer.config['volume']}")
+            
+            # Ensure effects config exists
+            if 'effects' not in self.layer.config:
+                self.layer.config['effects'] = {
+                    'enabled': False,
+                    'reverb_enabled': False,
+                    'reverb_room_size': 0.5,
+                    'reverb_damping': 0.5,
+                    'reverb_wet_level': 0.3,
+                    'reverb_dry_level': 0.8,
+                    'delay_enabled': False,
+                    'delay_time': 0.5,
+                    'delay_feedback': 0.5,
+                    'delay_mix': 0.5,
+                    'distortion_enabled': False,
+                    'distortion_drive': 25,
+                    'chorus_enabled': False,
+                    'chorus_rate': 1.0,
+                    'chorus_depth': 0.25,
+                    'chorus_mix': 0.5
+                }
+            
+            # Update soundfont config
+            if 'soundfont' not in self.layer.config:
+                self.layer.config['soundfont'] = {
+                    'enabled': False,
+                    'soundfont_path': '',
+                    'program': 0,
+                    'bank': 0,
+                    'midi_note': 60,
+                    'velocity': 100,
+                    'use_frequency': True
+                }
+            
+            self.layer.config['soundfont']['enabled'] = True
+            self.layer.config['soundfont']['soundfont_path'] = sf_path
+            self.layer.config['soundfont']['program'] = program
+            self.layer.config['soundfont']['velocity'] = velocity
+            self.layer.config['soundfont']['use_frequency'] = True
+            
+            print(f"Config ready. Calling play_layer...")
+            
+            # Play it
+            self.parent_studio.play_layer(self.layer)
+            
+            print("Play command sent.")
+            
+        except Exception as e:
+            import traceback
+            error_details = traceback.format_exc()
+            QMessageBox.critical(
+                self,
+                "Playback Error",
+                f"Failed to play SoundFont:\n\n{str(e)}\n\nSee console for details."
+            )
+            print(f"SoundFont playback error: {e}")
+            print(error_details)
+    
     def _create_param_spin(self, label, min_val, max_val, default, step):
         """Create a parameter spinbox with label."""
         group = QGroupBox(label)
@@ -849,16 +1420,117 @@ class DesignDialog(QDialog):
         self.echo_enabled.setChecked(cfg['advanced'].get('echo_enabled', False))
         self.echo_delay_spin.setValue(cfg['advanced'].get('echo_delay', 0.3))
         self.echo_feedback_spin.setValue(cfg['advanced'].get('echo_feedback', 0.4) * 100)  # Convert to percentage
+        
+        # Audio Effects (if available)
+        from audio_effects import PEDALBOARD_AVAILABLE
+        if PEDALBOARD_AVAILABLE and hasattr(self, 'audio_effects_enabled'):
+            effects = cfg.get('effects', {})
+            self.audio_effects_enabled.setChecked(effects.get('enabled', False))
+            
+            reverb = effects.get('reverb', {})
+            self.reverb_enabled.setChecked(reverb.get('enabled', False))
+            self.reverb_room_spin.setValue(reverb.get('room_size', 0.5))
+            self.reverb_damping_spin.setValue(reverb.get('damping', 0.5))
+            self.reverb_wet_spin.setValue(reverb.get('wet_level', 0.3))
+            
+            delay = effects.get('delay', {})
+            self.delay_enabled.setChecked(delay.get('enabled', False))
+            self.delay_time_spin.setValue(delay.get('delay_seconds', 0.5))
+            self.delay_feedback_spin.setValue(delay.get('feedback', 0.5))
+            self.delay_mix_spin.setValue(delay.get('mix', 0.5))
+            
+            distortion = effects.get('distortion', {})
+            self.distortion_enabled.setChecked(distortion.get('enabled', False))
+            self.distortion_drive_spin.setValue(distortion.get('drive_db', 10.0))
+            
+            chorus = effects.get('chorus', {})
+            self.chorus_enabled.setChecked(chorus.get('enabled', False))
+            self.chorus_rate_spin.setValue(chorus.get('rate_hz', 1.0))
+            self.chorus_depth_spin.setValue(chorus.get('depth', 0.25))
+            self.chorus_mix_spin.setValue(chorus.get('mix', 0.5))
+            
+            compressor = effects.get('compressor', {})
+            self.compressor_enabled.setChecked(compressor.get('enabled', False))
+            self.compressor_threshold_spin.setValue(compressor.get('threshold_db', -20.0))
+            self.compressor_ratio_spin.setValue(compressor.get('ratio', 4.0))
+        
+        # SoundFont (if available)
+        from soundfont_player import FLUIDSYNTH_AVAILABLE
+        if FLUIDSYNTH_AVAILABLE and hasattr(self, 'soundfont_enabled'):
+            soundfont = cfg.get('soundfont', {})
+            self.soundfont_enabled.setChecked(soundfont.get('enabled', False))
+            
+            sf_path = soundfont.get('soundfont_path', '')
+            if sf_path:
+                self.soundfont_path_label.setText(sf_path)
+                self.soundfont_path_label.setStyleSheet("color: #000;")
+            else:
+                self.soundfont_path_label.setText("No SoundFont loaded")
+                self.soundfont_path_label.setStyleSheet("color: #999; font-style: italic;")
+            
+            # Set program using combobox (extract number from text "0 - Acoustic Grand Piano")
+            program = soundfont.get('program', 0)
+            self.soundfont_program_combo.setCurrentIndex(program)
+            self.soundfont_velocity_spin.setValue(soundfont.get('velocity', 100))
+            
+            # Set note/duration if controls exist
+            if hasattr(self, 'soundfont_duration_spin'):
+                self.soundfont_duration_spin.setValue(cfg.get('duration', 1.0))
+            
+            # Try to match frequency to a note
+            if hasattr(self, 'soundfont_note_combo'):
+                current_freq = cfg.get('frequency', 261.63)
+                # Find closest matching note
+                best_match = 0
+                min_diff = float('inf')
+                for i in range(self.soundfont_note_combo.count()):
+                    note_freq = self.soundfont_note_combo.itemData(i)
+                    diff = abs(note_freq - current_freq)
+                    if diff < min_diff:
+                        min_diff = diff
+                        best_match = i
+                self.soundfont_note_combo.setCurrentIndex(best_match)
     
     def apply_changes(self):
         """Apply UI changes back to layer config."""
-        self.layer.name = self.name_input.text() or "Untitled Layer"
         cfg = self.layer.config
         
-        cfg['frequency'] = self.freq_spin.value()
+        # Check if SoundFont is enabled - if so, use SoundFont tab settings
+        soundfont_enabled = (hasattr(self, 'soundfont_enabled') and 
+                           self.soundfont_enabled.isChecked())
+        
+        if soundfont_enabled:
+            # Use settings from SoundFont tab
+            note_freq = self.soundfont_note_combo.currentData()
+            if note_freq:
+                cfg['frequency'] = note_freq
+            cfg['duration'] = self.soundfont_duration_spin.value()
+            # Keep a reasonable volume for SoundFont playback
+            if cfg.get('volume', 0) <= 0:
+                cfg['volume'] = 0.7
+            
+            # Auto-generate layer name from instrument and note
+            instrument_name = self.soundfont_program_combo.currentText()
+            note_name = self.soundfont_note_combo.currentText()
+            # Extract just the note part (e.g., "C4" from "C4 - 261.63 Hz (Middle C)")
+            note_short = note_name.split(' -')[0] if ' -' in note_name else note_name.split()[0]
+            # Extract just the instrument name (e.g., "Acoustic Grand Piano" from "0 - Acoustic Grand Piano")
+            instrument_short = instrument_name.split(' - ', 1)[1] if ' - ' in instrument_name else instrument_name
+            self.layer.name = f"{instrument_short} - {note_short}"
+            self.name_input.setText(self.layer.name)
+            
+            # Store the note name in config for display purposes
+            cfg['note_name'] = note_short
+        else:
+            # Use settings from Basic tab
+            cfg['frequency'] = self.freq_spin.value()
+            cfg['duration'] = self.duration_spin.value()
+            cfg['volume'] = self.volume_spin.value()
+            # Use manually entered name
+            self.layer.name = self.name_input.text() or "Untitled Layer"
+        
+        # Common settings
         cfg['wave_type'] = self.wave_combo.currentText()
-        cfg['duration'] = self.duration_spin.value()
-        cfg['volume'] = self.volume_spin.value()
         cfg['overlap'] = self.overlap_spin.value()
         cfg['attack'] = self.attack_spin[1].value()
         cfg['decay'] = self.decay_spin[1].value()
@@ -884,6 +1556,80 @@ class DesignDialog(QDialog):
         cfg['advanced']['echo_enabled'] = self.echo_enabled.isChecked()
         cfg['advanced']['echo_delay'] = self.echo_delay_spin.value()
         cfg['advanced']['echo_feedback'] = self.echo_feedback_spin.value() / 100.0  # Convert from percentage
+        
+        # Audio Effects (if available)
+        from audio_effects import PEDALBOARD_AVAILABLE
+        if PEDALBOARD_AVAILABLE and hasattr(self, 'audio_effects_enabled'):
+            if 'effects' not in cfg:
+                cfg['effects'] = {
+                    'enabled': False,
+                    'reverb_enabled': False,
+                    'reverb_room_size': 0.5,
+                    'reverb_damping': 0.5,
+                    'reverb_wet_level': 0.3,
+                    'reverb_dry_level': 0.8,
+                    'delay_enabled': False,
+                    'delay_time': 0.5,
+                    'delay_feedback': 0.5,
+                    'delay_mix': 0.5,
+                    'distortion_enabled': False,
+                    'distortion_drive': 25,
+                    'chorus_enabled': False,
+                    'chorus_rate': 1.0,
+                    'chorus_depth': 0.25,
+                    'chorus_mix': 0.5
+                }
+            
+            cfg['effects']['enabled'] = self.audio_effects_enabled.isChecked()
+            
+            cfg['effects']['reverb_enabled'] = self.reverb_enabled.isChecked()
+            cfg['effects']['reverb_room_size'] = self.reverb_room_spin.value()
+            cfg['effects']['reverb_damping'] = self.reverb_damping_spin.value()
+            cfg['effects']['reverb_wet_level'] = self.reverb_wet_spin.value()
+            
+            cfg['effects']['delay_enabled'] = self.delay_enabled.isChecked()
+            cfg['effects']['delay_time'] = self.delay_time_spin.value()
+            cfg['effects']['delay_feedback'] = self.delay_feedback_spin.value()
+            cfg['effects']['delay_mix'] = self.delay_mix_spin.value()
+            
+            cfg['effects']['distortion_enabled'] = self.distortion_enabled.isChecked()
+            cfg['effects']['distortion_drive'] = self.distortion_drive_spin.value()
+            
+            cfg['effects']['chorus_enabled'] = self.chorus_enabled.isChecked()
+            cfg['effects']['chorus_rate'] = self.chorus_rate_spin.value()
+            cfg['effects']['chorus_depth'] = self.chorus_depth_spin.value()
+            cfg['effects']['chorus_mix'] = self.chorus_mix_spin.value()
+            
+            cfg['effects']['compressor_enabled'] = self.compressor_enabled.isChecked()
+            cfg['effects']['compressor_threshold'] = self.compressor_threshold_spin.value()
+            cfg['effects']['compressor_ratio'] = self.compressor_ratio_spin.value()
+        
+        # SoundFont (if available)
+        from soundfont_player import FLUIDSYNTH_AVAILABLE
+        if FLUIDSYNTH_AVAILABLE and hasattr(self, 'soundfont_enabled'):
+            if 'soundfont' not in cfg:
+                cfg['soundfont'] = {
+                    'enabled': False,
+                    'soundfont_path': '',
+                    'program': 0,
+                    'bank': 0,
+                    'midi_note': 60,
+                    'velocity': 100,
+                    'use_frequency': True
+                }
+            
+            cfg['soundfont']['enabled'] = self.soundfont_enabled.isChecked()
+            
+            sf_path = self.soundfont_path_label.text()
+            if sf_path != "No SoundFont loaded":
+                cfg['soundfont']['soundfont_path'] = sf_path
+            
+            # Get program number from combobox index (index = program number)
+            cfg['soundfont']['program'] = self.soundfont_program_combo.currentIndex()
+            cfg['soundfont']['velocity'] = self.soundfont_velocity_spin.value()
+            
+            # Ensure use_frequency is True so it uses the frequency setting
+            cfg['soundfont']['use_frequency'] = True
         
         # Notify parent to refresh
         self.parent_studio.refresh_layer_list()
@@ -1132,6 +1878,14 @@ class SoundDesignStudioV2(QMainWindow):
         
         design_menu.addSeparator()
         
+        # Keyboard recorder for SoundFont sequences
+        recorder_action = QAction("&Record Instrument Sequence...", self)
+        recorder_action.setShortcut("Ctrl+R")
+        recorder_action.triggered.connect(self.open_keyboard_recorder)
+        design_menu.addAction(recorder_action)
+        
+        design_menu.addSeparator()
+        
         add_layer_action = QAction("Add &New Layer", self)
         add_layer_action.setShortcut("Ctrl+L")
         add_layer_action.triggered.connect(self.add_new_layer)
@@ -1343,7 +2097,46 @@ class SoundDesignStudioV2(QMainWindow):
         else:
             # Show actual values for configured layers
             # Basic parameters
-            self.layer_list.addItem(QListWidgetItem(f"  Frequency: {cfg['frequency']:.1f} Hz"))
+            
+            # Check if this is a SoundFont layer and show note name if available
+            soundfont_cfg = cfg.get('soundfont', {})
+            is_soundfont = soundfont_cfg.get('enabled', False)
+            
+            if is_soundfont:
+                # For SoundFont layers, show the note name instead of frequency
+                # First try to get stored note name
+                note_name = cfg.get('note_name')
+                
+                if not note_name:
+                    # Fall back to frequency lookup
+                    freq = cfg['frequency']
+                    # Map common frequencies to note names
+                    note_map = {
+                        65.41: "C2", 130.81: "C3", 261.63: "C4", 
+                        293.66: "D4", 329.63: "E4", 349.23: "F4", 
+                        392.00: "G4", 440.00: "A4", 493.88: "B4",
+                        523.25: "C5", 587.33: "D5", 659.25: "E5",
+                        698.46: "F5", 783.99: "G5", 880.00: "A5",
+                        1046.50: "C6"
+                    }
+                    # Find closest match
+                    for note_freq, name in note_map.items():
+                        if abs(freq - note_freq) < 1.0:  # Within 1 Hz
+                            note_name = name
+                            break
+                
+                if note_name:
+                    self.layer_list.addItem(QListWidgetItem(f"  Note: {note_name}"))
+                else:
+                    self.layer_list.addItem(QListWidgetItem(f"  Frequency: {cfg['frequency']:.1f} Hz"))
+                
+                # Show instrument info
+                instrument_num = soundfont_cfg.get('program', 0)
+                self.layer_list.addItem(QListWidgetItem(f"  Instrument: #{instrument_num}"))
+            else:
+                # Regular synthesis layer
+                self.layer_list.addItem(QListWidgetItem(f"  Frequency: {cfg['frequency']:.1f} Hz"))
+            
             self.layer_list.addItem(QListWidgetItem(f"  Waveform: {cfg['wave_type']}"))
             self.layer_list.addItem(QListWidgetItem(f"  Duration: {cfg['duration']:.2f} s"))
             self.layer_list.addItem(QListWidgetItem(f"  Volume: {cfg['volume']:.2f}"))
@@ -1560,6 +2353,161 @@ class SoundDesignStudioV2(QMainWindow):
         dialog.exec()
         self.refresh_layer_list()
     
+    def open_keyboard_recorder(self):
+        """Open the keyboard recorder dialog for recording instrument sequences."""
+        from soundfont_player import FLUIDSYNTH_AVAILABLE
+        
+        if not FLUIDSYNTH_AVAILABLE:
+            QMessageBox.warning(
+                self,
+                "SoundFont Not Available",
+                "The keyboard recorder requires FluidSynth for SoundFont playback.\n\n"
+                "Please install FluidSynth and pyfluidsynth to use this feature."
+            )
+            return
+        
+        # Check if we have a soundfont file
+        soundfont_path = "SoundFonts/GeneralUser-GS.sf2"
+        if not Path(soundfont_path).exists():
+            QMessageBox.warning(
+                self,
+                "SoundFont File Not Found",
+                f"Could not find SoundFont file at: {soundfont_path}\n\n"
+                "Please make sure you have a .sf2 file in the SoundFonts folder."
+            )
+            return
+        
+        # Open the keyboard recorder dialog
+        dialog = KeyboardRecorderDialog(self, self.audio_player, soundfont_path)
+        result = dialog.exec()
+        
+        if result == QDialog.DialogCode.Accepted and hasattr(dialog, 'recording_data'):
+            # Convert the recording into layers
+            self.create_layers_from_recording(dialog.recording_data)
+    
+    def create_layers_from_recording(self, recording_data):
+        """Create layers from a keyboard recording."""
+        notes = recording_data['notes']
+        instrument = recording_data['instrument']
+        instrument_name = recording_data['instrument_name']
+        soundfont_path = recording_data['soundfont_path']
+        
+        if not notes:
+            return
+        
+        # Calculate total duration
+        max_end_time = max(timestamp + duration for timestamp, _, _, duration in notes)
+        
+        # Generate the full audio sequence
+        try:
+            import numpy as np
+            from soundfont_player import SoundFontPlayer
+            
+            sample_rate = 44100
+            total_samples = int((max_end_time + 0.5) * sample_rate)
+            mixed_audio = np.zeros(total_samples)
+            
+            # Get soundfont player
+            sp = SoundFontPlayer()
+            if not sp.enabled:
+                raise Exception("SoundFont player not available")
+            
+            # Load the soundfont
+            sp.load_soundfont(soundfont_path)
+            
+            # Generate each note and place it at the correct time
+            for timestamp, note_name, midi_note, duration in notes:
+                # Generate this note
+                note_audio = sp.generate_note(midi_note, 100, duration, instrument, 0)
+                
+                # Calculate where to place it in the timeline
+                start_sample = int(timestamp * sample_rate)
+                end_sample = start_sample + len(note_audio)
+                
+                # Make sure we don't exceed the buffer
+                if end_sample > len(mixed_audio):
+                    # Extend the buffer if needed
+                    mixed_audio = np.concatenate([mixed_audio, np.zeros(end_sample - len(mixed_audio))])
+                
+                # Mix this note into the timeline
+                mixed_audio[start_sample:end_sample] += note_audio
+            
+            # Normalize to prevent clipping
+            max_val = np.max(np.abs(mixed_audio))
+            if max_val > 0:
+                mixed_audio = mixed_audio / max_val * 0.8  # Leave some headroom
+            
+            # Save the generated audio as a WAV file temporarily
+            import tempfile
+            import soundfile as sf
+            from pathlib import Path
+            
+            # Create recordings directory if it doesn't exist
+            recordings_dir = Path("recordings")
+            recordings_dir.mkdir(exist_ok=True)
+            
+            # Generate unique filename
+            import time
+            timestamp_str = time.strftime("%Y%m%d_%H%M%S")
+            wav_filename = recordings_dir / f"recording_{timestamp_str}.wav"
+            
+            # Save as WAV file
+            sf.write(wav_filename, mixed_audio, sample_rate)
+            
+            # Create a layer that references this WAV file
+            layer_name = f"{instrument_name} - Recording ({len(notes)} notes)"
+            self.document.add_layer(layer_name, blank=False)
+            layer = self.document.layers[-1]
+            
+            # Configure the layer to use the recorded audio
+            cfg = layer.config
+            cfg['duration'] = len(mixed_audio) / sample_rate
+            cfg['volume'] = 0.7
+            cfg['play_type'] = 'recorded_sequence'
+            
+            # Store the recording information
+            cfg['recorded_audio_file'] = str(wav_filename)
+            cfg['recording_notes'] = notes  # Store for reference
+            cfg['note_name'] = f"{len(notes)} notes"
+            
+            # Set up SoundFont configuration for display
+            if 'soundfont' not in cfg:
+                cfg['soundfont'] = {}
+            
+            cfg['soundfont']['enabled'] = True
+            cfg['soundfont']['soundfont_path'] = soundfont_path
+            cfg['soundfont']['program'] = instrument
+            
+            # Switch to the new layer
+            self.current_layer_index = len(self.document.layers) - 1
+            self.refresh_layer_list()
+            
+            self.statusBar().showMessage(
+                f"Created layer '{layer_name}' - Full sequence ready to play!",
+                5000
+            )
+            
+            QMessageBox.information(
+                self,
+                "Recording Saved",
+                f"Your recording has been saved as a new layer.\n\n"
+                f"Layer: {layer_name}\n"
+                f"Notes recorded: {len(notes)}\n"
+                f"Duration: {max_end_time:.2f} seconds\n"
+                f"Audio file: {wav_filename.name}\n\n"
+                f"The full sequence will play back exactly as you recorded it!"
+            )
+            
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            QMessageBox.critical(
+                self,
+                "Error Creating Recording",
+                f"Failed to create recording layer:\n\n{str(e)}\n\n"
+                f"Check console for details."
+            )
+    
     def open_preset_preview(self):
         """Open the preset preview dialog."""
         dialog = PresetPreviewDialog(self)
@@ -1580,7 +2528,9 @@ class SoundDesignStudioV2(QMainWindow):
             else:
                 # Simultaneous playback - mix all layers together
                 self.statusBar().showMessage(f"Playing {len(self.document.layers)} layers simultaneously...")
-                configs = [PlayAudioConfig(**layer.config) for layer in self.document.layers]
+                # Filter out display-only fields from each layer config
+                configs = [PlayAudioConfig(**{k: v for k, v in layer.config.items() if k != 'note_name'}) 
+                          for layer in self.document.layers]
                 self.audio_player.play_mixed_sounds(configs)
                 self.statusBar().showMessage("Playback complete", 3000)
         except Exception as e:
@@ -1601,8 +2551,39 @@ class SoundDesignStudioV2(QMainWindow):
     
     def play_layer(self, layer: SoundLayer):
         """Play a single sound layer."""
-        config = PlayAudioConfig(**layer.config)
-        self.audio_player.play_sound(config)
+        try:
+            print(f"\n=== play_layer called ===")
+            print(f"Layer name: {layer.name}")
+            print(f"Layer config keys: {layer.config.keys()}")
+            print(f"SoundFont enabled: {layer.config.get('soundfont', {}).get('enabled', False)}")
+            print(f"SoundFont path: {layer.config.get('soundfont', {}).get('soundfont_path', 'N/A')}")
+            print(f"Frequency: {layer.config.get('frequency')}")
+            print(f"Duration: {layer.config.get('duration')}")
+            print(f"Volume: {layer.config.get('volume')}")
+            
+            # Filter out display-only fields that aren't audio config parameters
+            audio_config = {k: v for k, v in layer.config.items() if k != 'note_name'}
+            
+            config = PlayAudioConfig(**audio_config)
+            print(f"PlayAudioConfig created successfully")
+            print(f"Calling audio_player.play_sound...")
+            self.audio_player.play_sound(config)
+            print(f"play_sound returned")
+        except Exception as e:
+            import traceback
+            error_msg = f"Error playing sound: {str(e)}\n\n{traceback.format_exc()}"
+            print(error_msg)
+            QMessageBox.critical(
+                self,
+                "Playback Error",
+                f"Failed to play sound:\n\n{str(e)}\n\nCheck console for details.\n\n"
+                f"Try:\n"
+                f"1. Disable SoundFont in Layer Designer\n"
+                f"2. Use synthesis mode instead\n"
+                f"3. Check that .sf2 file is valid"
+            )
+            # Try to continue with a safe fallback
+            self.statusBar().showMessage(f"Playback failed: {str(e)}", 5000)
     
     def new_document(self):
         """Create a new sound document."""
